@@ -323,7 +323,7 @@ where
 
 impl<K, N> IntoIterator for KeyNodeList<K, N>
 where
-  K: Hash + Eq,
+  K: Hash + Eq + Clone,
   N: Node<Key = K>,
 {
   type Item = (K, N);
