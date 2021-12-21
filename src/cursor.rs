@@ -1,5 +1,5 @@
 use crate::list::KeyNodeList;
-use crate::node::Node;
+use crate::node::{Node, Token};
 use std::fmt;
 use std::hash::Hash;
 
@@ -222,5 +222,157 @@ where
       .tail
       .as_ref()
       .and_then(|k| self.list.nodes.get_mut(k))
+  }
+}
+
+/// Gets a mutable reference of the previous pointer of the specific node.
+macro_rules! node_prev_mut {
+  ($self:ident, $key:expr) => {
+    $self.list.node_mut($key).unwrap().prev_mut::<Token>()
+  };
+}
+
+/// Gets a mutable reference of the next pointer of the specific node.
+macro_rules! node_next_mut {
+  ($self:ident, $key:expr) => {
+    $self.list.node_mut($key).unwrap().next_mut::<Token>()
+  };
+}
+
+impl<'a, K, N> CursorMut<'a, K, N>
+where
+  K: Hash + Eq + Clone,
+  N: Node<Key = K>,
+{
+  /// Inserts a new key-node pair into the [`KeyNodeList`] after the current one.
+  ///
+  /// If the cursor is pointing at the null pair then the new pair is inserted
+  /// at the front of the [`KeyNodeList`].
+  ///
+  /// If `key` already exists, returns an error containing `key` and `node`.
+  pub fn insert_after(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+    if self.list.contains_key(&key) {
+      // `key` already exists
+      Err((key, node))
+    } else {
+      // get the `next` pointer of the node pointed by the cursor
+      let next = match &self.key {
+        // cursor points to the key `k`
+        // update the `next` pointer of the `k` node
+        Some(k) => node_next_mut!(self, k).replace(key.clone()),
+        // cursor points to the null pair
+        // insert at front of the list, update the head pointer
+        None => self.list.head.replace(key.clone()),
+      };
+      // update the next node at the insertion position
+      match next {
+        // next node has key `k`, update its `prev` pointer
+        Some(k) => *node_prev_mut!(self, &k) = Some(key.clone()),
+        // next node is the null pair, update the tail pointer
+        None => self.list.tail = Some(key.clone()),
+      }
+      // insert key-node pair to the node map
+      self.list.nodes.insert(key, node);
+      Ok(())
+    }
+  }
+
+  /// Inserts a new key-node pair into the [`KeyNodeList`] before the current one.
+  ///
+  /// If the cursor is pointing at the null pair then the new pair is inserted
+  /// at the end of the [`KeyNodeList`].
+  ///
+  /// If `key` already exists, returns an error containing `key` and `node`.
+  pub fn insert_before(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+    if self.list.contains_key(&key) {
+      // `key` already exists
+      Err((key, node))
+    } else {
+      // get the `prev` pointer of the node pointed by the cursor
+      let prev = match &self.key {
+        // cursor points to the key `k`
+        // update the `prev` pointer of the `k` node
+        Some(k) => node_prev_mut!(self, k).replace(key.clone()),
+        // cursor points to the null pair
+        // insert at end of the list, update the tail pointer
+        None => self.list.tail.replace(key.clone()),
+      };
+      // update the previous node at the insertion position
+      match prev {
+        // previous node has key `k`, update its `next` pointer
+        Some(k) => *node_next_mut!(self, &k) = Some(key.clone()),
+        // previous node is the null pair, update the head pointer
+        None => self.list.head = Some(key.clone()),
+      }
+      // insert key-node pair to the node map
+      self.list.nodes.insert(key, node);
+      Ok(())
+    }
+  }
+
+  /// Removes the current pair from the [`KeyNodeList`].
+  ///
+  /// The pair that was removed is returned, and the cursor is moved to point
+  /// to the next pair in the [`KeyNodeList`].
+  ///
+  /// If the cursor is currently pointing to the null pair then no pair is
+  /// removed and `None` is returned.
+  #[inline]
+  pub fn remove_current(&mut self) -> Option<(K, N)> {
+    self.key.take().map(|k| {
+      let pair = self.list.remove(&k).unwrap();
+      self.key = pair.1.next().cloned();
+      pair
+    })
+  }
+
+  /// Appends an pair to the front of the cursor’s parent list. The pair that
+  /// the cursor points to is unchanged, even if it is the null pair.
+  ///
+  /// If `key` already exists, returns an error containing `key` and `node`.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  #[inline]
+  pub fn push_front(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+    self.list.push_front(key, node)
+  }
+
+  /// Appends an pair to the back of the cursor’s parent list. The pair that
+  /// the cursor points to is unchanged, even if it is the null pair.
+  ///
+  /// If `key` already exists, returns an error containing `key` and `node`.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  #[inline]
+  pub fn push_back(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+    self.list.push_back(key, node)
+  }
+
+  /// Removes the first pair from the cursor’s parent list and returns it, or
+  /// `None` if the list is empty. The pair the cursor points to remains
+  /// unchanged, unless it was pointing to the front pair. In that case, it
+  /// points to the new front pair.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  #[inline]
+  pub fn pop_front(&mut self) -> Option<(K, N)> {
+    if self.list.head == self.key {
+      self.move_next();
+    }
+    self.list.pop_front()
+  }
+
+  /// Removes the last pair from the cursor’s parent list and returns it, or
+  /// `None` if the list is empty. The pair the cursor points to remains
+  /// unchanged, unless it was pointing to the back pair. In that case, it
+  /// points to the null pair.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  #[inline]
+  pub fn pop_back(&mut self) -> Option<(K, N)> {
+    if self.list.tail == self.key {
+      self.key = None;
+    }
+    self.list.pop_back()
   }
 }
