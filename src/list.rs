@@ -238,6 +238,56 @@ where
   }
 }
 
+impl<K, N> KeyNodeList<K, N>
+where
+  K: Hash + Eq + Clone,
+  N: Node<Key = K>,
+{
+  /// Adds an key-node pair first in the list.
+  ///
+  /// If `key` already exists, returns an error containing `key` and `node`.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  pub fn push_front(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+    todo!()
+  }
+
+  /// Adds an key-node pair back in the list.
+  ///
+  /// If `key` already exists, returns an error containing `key` and `node`.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  pub fn push_back(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+    todo!()
+  }
+
+  /// Removes the first key-node pair and returns it, or `None` if the list
+  /// is empty.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  pub fn pop_front(&mut self) -> Option<(K, N)> {
+    todo!()
+  }
+
+  /// Removes the last key-node pair and returns it, or `None` if the list
+  /// is empty.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  pub fn pop_back(&mut self) -> Option<(K, N)> {
+    todo!()
+  }
+
+  /// Removes the key-node pair at the given key and returns it,
+  /// or returns `None` if `key` does not exists.
+  pub fn remove<Q: ?Sized>(&mut self, key: &Q) -> Option<(K, N)>
+  where
+    K: Borrow<Q>,
+    Q: Hash + Eq,
+  {
+    todo!()
+  }
+}
+
 impl<K, N> fmt::Debug for KeyNodeList<K, N>
 where
   K: Hash + Eq + fmt::Debug,
