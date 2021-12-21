@@ -9,14 +9,14 @@ pub struct IntoIter<K, N> {
 
 impl<K, N> Iterator for IntoIter<K, N>
 where
-  K: Hash + Eq,
+  K: Hash + Eq + Clone,
   N: Node<Key = K>,
 {
   type Item = (K, N);
 
   #[inline]
   fn next(&mut self) -> Option<Self::Item> {
-    todo!()
+    self.list.pop_front()
   }
 }
 
