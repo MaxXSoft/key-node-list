@@ -36,7 +36,7 @@ where
   #[inline]
   fn next(&mut self) -> Option<Self::Item> {
     self.key.and_then(|k| {
-      self.list.get(k).map(|n| {
+      self.list.node(k).map(|n| {
         self.key = n.next();
         (k, n)
       })
