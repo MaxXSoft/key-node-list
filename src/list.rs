@@ -1,3 +1,4 @@
+use crate::cursor::{Cursor, CursorMut};
 use crate::iter::{IntoIter, Iter, Keys, Nodes};
 use crate::node::{Node, Token};
 use std::borrow::Borrow;
@@ -21,31 +22,31 @@ impl<K, N> KeyNodeList<K, N> {
     Self::default()
   }
 
-  /// Returns the head key of the linked list.
+  /// Returns a reference to the front key, or `None` if the list is empty.
   #[inline]
-  pub fn head(&self) -> Option<&K> {
+  pub fn front_key(&self) -> Option<&K> {
     self.head.as_ref()
   }
 
-  /// Returns the tail key of the linked list.
+  /// Returns a reference to the back key, or `None` if the list is empty.
   #[inline]
-  pub fn tail(&self) -> Option<&K> {
+  pub fn back_key(&self) -> Option<&K> {
     self.tail.as_ref()
   }
 
-  /// Returns the number of elements in the linked list.
+  /// Returns the number of key-node pairs in the list.
   #[inline]
   pub fn len(&self) -> usize {
     self.nodes.len()
   }
 
-  /// Returns `true` if the linked list contains no elements.
+  /// Returns `true` if the list contains no key-node pairs.
   #[inline]
   pub fn is_empty(&self) -> bool {
     self.nodes.is_empty()
   }
 
-  /// Removes all elements in the linked list.
+  /// Removes all key-node pairs in the list.
   #[inline]
   pub fn clear(&mut self) {
     self.nodes.clear();
@@ -53,7 +54,7 @@ impl<K, N> KeyNodeList<K, N> {
     self.tail = None;
   }
 
-  /// Creates an iterator from a value.
+  /// Creates an iterator from the list.
   #[inline]
   pub fn into_iter(self) -> IntoIter<K, N> {
     IntoIter { list: self }
@@ -95,9 +96,10 @@ where
     self.nodes.contains_key(key)
   }
 
-  /// Returns a reference to the node corresponding to the key.
+  /// Returns a reference to the node corresponding to the key,
+  /// or `None` if key does not exist.
   #[inline]
-  pub fn get<Q: ?Sized>(&self, key: &Q) -> Option<&N>
+  pub fn node<Q: ?Sized>(&self, key: &Q) -> Option<&N>
   where
     K: Borrow<Q>,
     Q: Hash + Eq,
@@ -105,9 +107,10 @@ where
     self.nodes.get(key)
   }
 
-  /// Returns a mutable reference to the node corresponding to the key.
+  /// Returns a mutable reference to the node corresponding to the key,
+  /// or `None` if key does not exist.
   #[inline]
-  pub fn get_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<&mut N>
+  pub fn node_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<&mut N>
   where
     K: Borrow<Q>,
     Q: Hash + Eq,
@@ -115,27 +118,29 @@ where
     self.nodes.get_mut(key)
   }
 
-  /// Returns a reference to the first node of the linked list.
+  /// Returns a reference to the front node, or `None` if the list is empty.
   #[inline]
-  pub fn head_node(&self) -> Option<&N> {
+  pub fn front_node(&self) -> Option<&N> {
     self.head.as_ref().and_then(|k| self.nodes.get(k))
   }
 
-  /// Returns a mutable reference to the first node of the linked list.
+  /// Returns a mutable reference to the front node,
+  /// or `None` if the list is empty.
   #[inline]
-  pub fn head_node_mut(&mut self) -> Option<&mut N> {
+  pub fn front_node_mut(&mut self) -> Option<&mut N> {
     self.head.as_ref().and_then(|k| self.nodes.get_mut(k))
   }
 
-  /// Returns a reference to the last node of the linked list.
+  /// Returns a reference to the back node, or `None` if the list is empty.
   #[inline]
-  pub fn tail_node(&self) -> Option<&N> {
+  pub fn back_node(&self) -> Option<&N> {
     self.tail.as_ref().and_then(|k| self.nodes.get(k))
   }
 
-  /// Returns a mutable reference to the last node of the linked list.
+  /// Returns a mutable reference to the back node,
+  /// or `None` if the list is empty.
   #[inline]
-  pub fn tail_node_mut(&mut self) -> Option<&mut N> {
+  pub fn back_node_mut(&mut self) -> Option<&mut N> {
     self.tail.as_ref().and_then(|k| self.nodes.get_mut(k))
   }
 }
@@ -145,34 +150,6 @@ where
   K: Hash + Eq,
   N: Node<Key = K>,
 {
-  /// Returns a reference of the previous node of `node`,
-  /// or `None` if `node` is the first node or not in the linked list.
-  #[inline]
-  pub fn prev_node(&self, node: &N) -> Option<&N> {
-    node.prev().and_then(|k| self.nodes.get(k))
-  }
-
-  /// Returns a mutable reference of the previous node of `node`,
-  /// or `None` if `node` is the first node or not in the linked list.
-  #[inline]
-  pub fn prev_node_mut(&mut self, node: &N) -> Option<&mut N> {
-    node.prev().and_then(|k| self.nodes.get_mut(k))
-  }
-
-  /// Returns a reference of the next node of `node`,
-  /// or `None` if `node` is the last node or not in the linked list.
-  #[inline]
-  pub fn next_node(&self, node: &N) -> Option<&N> {
-    node.next().and_then(|k| self.nodes.get(k))
-  }
-
-  /// Returns a mutable reference of the next node of `node`,
-  /// or `None` if `node` is the last node or not in the linked list.
-  #[inline]
-  pub fn next_node_mut(&mut self, node: &N) -> Option<&mut N> {
-    node.next().and_then(|k| self.nodes.get_mut(k))
-  }
-
   /// Inserts key-node pair `key` and `node` before the node `cur`.
   ///
   /// If `cur` is `None`, `key` and `node` are inserted at the end of the
@@ -207,6 +184,78 @@ where
       }
       self.nodes.insert(key, node);
       Ok(())
+    }
+  }
+}
+
+impl<K, N> KeyNodeList<K, N>
+where
+  K: Hash + Eq + Clone,
+  N: Node<Key = K>,
+{
+  /// Provides a cursor at the front key-node pair.
+  ///
+  /// The cursor is pointing to the null pair if the list is empty.
+  #[inline]
+  pub fn cursor_front(&self) -> Cursor<K, N> {
+    Cursor {
+      list: self,
+      key: self.head.clone(),
+    }
+  }
+
+  /// Provides a cursor with editing operations at the front key-node pair.
+  ///
+  /// The cursor is pointing to the null pair if the list is empty.
+  #[inline]
+  pub fn cursor_front_mut(&mut self) -> CursorMut<K, N> {
+    CursorMut {
+      key: self.head.clone(),
+      list: self,
+    }
+  }
+
+  /// Provides a cursor at the back key-node pair.
+  ///
+  /// The cursor is pointing to the null pair if the list is empty.
+  #[inline]
+  pub fn cursor_back(&self) -> Cursor<K, N> {
+    Cursor {
+      list: self,
+      key: self.tail.clone(),
+    }
+  }
+
+  /// Provides a cursor with editing operations at the back key-node pair.
+  ///
+  /// The cursor is pointing to the null pair if the list is empty.
+  #[inline]
+  pub fn cursor_back_mut(&mut self) -> CursorMut<K, N> {
+    CursorMut {
+      key: self.tail.clone(),
+      list: self,
+    }
+  }
+
+  /// Provides a cursor at the specific key.
+  ///
+  /// The cursor is pointing to the null pair if the key does not exist.
+  #[inline]
+  pub fn cursor(&self, key: &K) -> Cursor<K, N> {
+    Cursor {
+      list: self,
+      key: self.contains_key(key).then(|| key.clone()),
+    }
+  }
+
+  /// Provides a cursor with editing operations at the specific key.
+  ///
+  /// The cursor is pointing to the null pair if the key does not exist.
+  #[inline]
+  pub fn cursor_mut(&mut self, key: &K) -> CursorMut<K, N> {
+    CursorMut {
+      key: self.contains_key(key).then(|| key.clone()),
+      list: self,
     }
   }
 }
