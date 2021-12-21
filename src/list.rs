@@ -2,15 +2,16 @@ use crate::iter::{IntoIter, Iter, Keys, Nodes};
 use crate::node::{Node, Token};
 use std::borrow::Borrow;
 use std::collections::HashMap;
+use std::fmt;
 use std::hash::Hash;
 use std::ops::Index;
 
 /// A linked list with key-node form.
 #[derive(Clone)]
 pub struct KeyNodeList<K, N> {
-  nodes: HashMap<K, N>,
-  head: Option<K>,
-  tail: Option<K>,
+  pub(crate) nodes: HashMap<K, N>,
+  pub(crate) head: Option<K>,
+  pub(crate) tail: Option<K>,
 }
 
 impl<K, N> KeyNodeList<K, N> {
@@ -207,6 +208,16 @@ where
       self.nodes.insert(key, node);
       Ok(())
     }
+  }
+}
+
+impl<K, N> fmt::Debug for KeyNodeList<K, N>
+where
+  K: Hash + Eq + fmt::Debug,
+  N: Node<Key = K> + fmt::Debug,
+{
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    f.debug_list().entries(self).finish()
   }
 }
 
