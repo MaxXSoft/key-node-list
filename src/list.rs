@@ -23,24 +23,32 @@ impl<K, N> KeyNodeList<K, N> {
   }
 
   /// Returns a reference to the front key, or `None` if the list is empty.
+  ///
+  /// This operation should compute in *O*(1) time.
   #[inline]
   pub fn front_key(&self) -> Option<&K> {
     self.head.as_ref()
   }
 
   /// Returns a reference to the back key, or `None` if the list is empty.
+  ///
+  /// This operation should compute in *O*(1) time.
   #[inline]
   pub fn back_key(&self) -> Option<&K> {
     self.tail.as_ref()
   }
 
   /// Returns the number of key-node pairs in the list.
+  ///
+  /// This operation should compute in *O*(1) time.
   #[inline]
   pub fn len(&self) -> usize {
     self.nodes.len()
   }
 
   /// Returns `true` if the list contains no key-node pairs.
+  ///
+  /// This operation should compute in *O*(1) time.
   #[inline]
   pub fn is_empty(&self) -> bool {
     self.nodes.is_empty()
@@ -87,6 +95,8 @@ where
   K: Hash + Eq,
 {
   /// Returns `true` if the linked list contains a node for the specified key.
+  ///
+  /// This operation should compute in *O*(1) time on average.
   #[inline]
   pub fn contains_key<Q: ?Sized>(&self, key: &Q) -> bool
   where
@@ -98,6 +108,8 @@ where
 
   /// Returns a reference to the node corresponding to the key,
   /// or `None` if key does not exist.
+  ///
+  /// This operation should compute in *O*(1) time on average.
   #[inline]
   pub fn node<Q: ?Sized>(&self, key: &Q) -> Option<&N>
   where
@@ -109,6 +121,8 @@ where
 
   /// Returns a mutable reference to the node corresponding to the key,
   /// or `None` if key does not exist.
+  ///
+  /// This operation should compute in *O*(1) time on average.
   #[inline]
   pub fn node_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<&mut N>
   where
@@ -119,6 +133,8 @@ where
   }
 
   /// Returns a reference to the front node, or `None` if the list is empty.
+  ///
+  /// This operation should compute in *O*(1) time on average.
   #[inline]
   pub fn front_node(&self) -> Option<&N> {
     self.head.as_ref().and_then(|k| self.nodes.get(k))
@@ -126,12 +142,16 @@ where
 
   /// Returns a mutable reference to the front node,
   /// or `None` if the list is empty.
+  ///
+  /// This operation should compute in *O*(1) time on average.
   #[inline]
   pub fn front_node_mut(&mut self) -> Option<&mut N> {
     self.head.as_ref().and_then(|k| self.nodes.get_mut(k))
   }
 
   /// Returns a reference to the back node, or `None` if the list is empty.
+  ///
+  /// This operation should compute in *O*(1) time on average.
   #[inline]
   pub fn back_node(&self) -> Option<&N> {
     self.tail.as_ref().and_then(|k| self.nodes.get(k))
@@ -139,6 +159,8 @@ where
 
   /// Returns a mutable reference to the back node,
   /// or `None` if the list is empty.
+  ///
+  /// This operation should compute in *O*(1) time on average.
   #[inline]
   pub fn back_node_mut(&mut self) -> Option<&mut N> {
     self.tail.as_ref().and_then(|k| self.nodes.get_mut(k))
