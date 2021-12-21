@@ -143,6 +143,28 @@ where
   pub fn back_node_mut(&mut self) -> Option<&mut N> {
     self.tail.as_ref().and_then(|k| self.nodes.get_mut(k))
   }
+
+  /// Provides a cursor at the specific key.
+  ///
+  /// The cursor is pointing to the null pair if the key does not exist.
+  #[inline]
+  pub fn cursor(&self, key: K) -> Cursor<K, N> {
+    Cursor {
+      list: self,
+      key: self.contains_key(&key).then(|| key),
+    }
+  }
+
+  /// Provides a cursor with editing operations at the specific key.
+  ///
+  /// The cursor is pointing to the null pair if the key does not exist.
+  #[inline]
+  pub fn cursor_mut(&mut self, key: K) -> CursorMut<K, N> {
+    CursorMut {
+      key: self.contains_key(&key).then(|| key),
+      list: self,
+    }
+  }
 }
 
 impl<K, N> KeyNodeList<K, N>
@@ -191,7 +213,6 @@ where
 impl<K, N> KeyNodeList<K, N>
 where
   K: Hash + Eq + Clone,
-  N: Node<Key = K>,
 {
   /// Provides a cursor at the front key-node pair.
   ///
@@ -233,28 +254,6 @@ where
   pub fn cursor_back_mut(&mut self) -> CursorMut<K, N> {
     CursorMut {
       key: self.tail.clone(),
-      list: self,
-    }
-  }
-
-  /// Provides a cursor at the specific key.
-  ///
-  /// The cursor is pointing to the null pair if the key does not exist.
-  #[inline]
-  pub fn cursor(&self, key: &K) -> Cursor<K, N> {
-    Cursor {
-      list: self,
-      key: self.contains_key(key).then(|| key.clone()),
-    }
-  }
-
-  /// Provides a cursor with editing operations at the specific key.
-  ///
-  /// The cursor is pointing to the null pair if the key does not exist.
-  #[inline]
-  pub fn cursor_mut(&mut self, key: &K) -> CursorMut<K, N> {
-    CursorMut {
-      key: self.contains_key(key).then(|| key.clone()),
       list: self,
     }
   }
