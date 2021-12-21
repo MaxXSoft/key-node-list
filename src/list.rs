@@ -1,6 +1,6 @@
 use crate::cursor::{Cursor, CursorMut};
 use crate::iter::{IntoIter, Iter, Keys, Nodes};
-use crate::node::{Node, Token};
+use crate::node::Node;
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fmt;
@@ -185,49 +185,6 @@ where
     CursorMut {
       key: self.contains_key(&key).then(|| key),
       list: self,
-    }
-  }
-}
-
-impl<K, N> KeyNodeList<K, N>
-where
-  K: Hash + Eq,
-  N: Node<Key = K>,
-{
-  /// Inserts key-node pair `key` and `node` before the node `cur`.
-  ///
-  /// If `cur` is `None`, `key` and `node` are inserted at the end of the
-  /// linked list.
-  ///
-  /// If `key` already exists, returns an error containing `key` and `node`.
-  pub fn insert_before(&mut self, cur: Option<&N>, key: K, mut node: N) -> Result<(), (K, N)>
-  where
-    K: Clone,
-  {
-    if self.nodes.contains_key(&key) {
-      Err((key, node))
-    } else {
-      if let Some(cur) = cur {
-        let cur_key = cur.prev().map_or_else(
-          || self.head.replace(key.clone()),
-          |prev_key| {
-            let prev = self.nodes.get_mut(prev_key).unwrap();
-            prev.next_mut::<Token>().replace(key.clone())
-          },
-        );
-        *node.prev_mut::<Token>() = self
-          .nodes
-          .get_mut(cur_key.as_ref().unwrap())
-          .unwrap()
-          .prev_mut::<Token>()
-          .replace(key.clone());
-        *node.next_mut::<Token>() = cur_key;
-      } else {
-        let prev_key = self.tail.replace(key.clone());
-        // self.nodes.get_mut(prev_key.as_ref().unwrap())
-      }
-      self.nodes.insert(key, node);
-      Ok(())
     }
   }
 }
