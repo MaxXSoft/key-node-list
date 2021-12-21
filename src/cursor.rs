@@ -17,7 +17,7 @@ macro_rules! impl_cursor {
       /// Returns `None` if the cursor is currently pointing to the null pair.
       #[inline]
       pub fn key(&self) -> Option<&$k> {
-        self.$key
+        self.$key.as_ref()
       }
 
       /// Provides a reference to the front key of the cursor’s parent list,
@@ -44,7 +44,7 @@ macro_rules! impl_cursor {
       /// Returns `None` if the cursor is currently pointing to the null pair.
       #[inline]
       pub fn node(&self) -> Option<&$n> {
-        self.$key.and_then(|k| self.$list.nodes.get(k))
+        self.$key.as_ref().and_then(|k| self.$list.nodes.get(k))
       }
 
       /// Provides a reference to the front node of the cursor’s parent list,
@@ -74,9 +74,9 @@ macro_rules! impl_cursor {
       /// [`KeyNodeList`] then this returns `None`.
       #[inline]
       pub fn next_key(&self) -> Option<&$k> {
-        self.$key.map_or_else(
+        self.$key.as_ref().map_or_else(
           || self.$list.head.as_ref(),
-          |k| self.$list.get(k).and_then(|n| n.next()),
+          |k| self.$list.node(k).and_then(|n| n.next()),
         )
       }
 
@@ -87,9 +87,9 @@ macro_rules! impl_cursor {
       /// [`KeyNodeList`] then this returns `None`.
       #[inline]
       pub fn prev_key(&self) -> Option<&$k> {
-        self.$key.map_or_else(
+        self.$key.as_ref().map_or_else(
           || self.$list.tail.as_ref(),
-          |k| self.$list.get(k).and_then(|n| n.prev()),
+          |k| self.$list.node(k).and_then(|n| n.prev()),
         )
       }
 
@@ -100,7 +100,7 @@ macro_rules! impl_cursor {
       /// [`KeyNodeList`] then this returns `None`.
       #[inline]
       pub fn next_node(&self) -> Option<&$n> {
-        self.next_key().and_then(|k| self.$list.get(k))
+        self.next_key().and_then(|k| self.$list.node(k))
       }
 
       /// Returns a reference to the previous node.
@@ -110,9 +110,15 @@ macro_rules! impl_cursor {
       /// [`KeyNodeList`] then this returns `None`.
       #[inline]
       pub fn prev_node(&self) -> Option<&$n> {
-        self.prev_key().and_then(|k| self.$list.get(k))
+        self.prev_key().and_then(|k| self.$list.node(k))
       }
+    }
 
+    impl<$a, $k, $n> $name<$a, $k, $n>
+    where
+      $k: Hash + Eq + Clone,
+      $n: Node<Key = $k>,
+    {
       /// Moves the cursor to the next key-node pair of the [`KeyNodeList`].
       ///
       /// If the cursor is pointing to the null pair then this will move it to
@@ -120,10 +126,10 @@ macro_rules! impl_cursor {
       /// the last key-node pair of the [`KeyNodeList`] then this will move it
       /// to the null pair.
       #[inline]
-      pub fn move_next(&$a mut self) {
-        self.$key = self.$key.map_or_else(
-          || self.$list.head.as_ref(),
-          |k| self.$list.get(k).and_then(|n| n.next()),
+      pub fn move_next(&mut self) {
+        self.$key = self.$key.as_ref().map_or_else(
+          || self.$list.head.clone(),
+          |k| self.$list.node(k).and_then(|n| n.next().cloned()),
         );
       }
 
@@ -134,10 +140,10 @@ macro_rules! impl_cursor {
       /// the first key-node pair of the [`KeyNodeList`] then this will move it
       /// to the null pair.
       #[inline]
-      pub fn move_prev(&$a mut self) {
-        self.$key = self.$key.map_or_else(
-          || self.$list.tail.as_ref(),
-          |k| self.$list.get(k).and_then(|n| n.prev()),
+      pub fn move_prev(&mut self) {
+        self.$key = self.$key.as_ref().map_or_else(
+          || self.$list.tail.clone(),
+          |k| self.$list.node(k).and_then(|n| n.prev().cloned()),
         );
       }
     }
@@ -161,7 +167,7 @@ macro_rules! impl_cursor {
 #[derive(Clone)]
 pub struct Cursor<'a, K, N> {
   pub(crate) list: &'a KeyNodeList<K, N>,
-  pub(crate) key: Option<&'a K>,
+  pub(crate) key: Option<K>,
 }
 
 impl_cursor!(Cursor<'a, K, N>(list, key));
@@ -169,12 +175,15 @@ impl_cursor!(Cursor<'a, K, N>(list, key));
 /// A cursor over a [`KeyNodeList`] with editing operations.
 pub struct CursorMut<'a, K, N> {
   pub(crate) list: &'a mut KeyNodeList<K, N>,
-  pub(crate) key: Option<&'a K>,
+  pub(crate) key: Option<K>,
 }
 
 impl_cursor!(CursorMut<'a, K, N>(list, key));
 
-impl<'a, K, N> CursorMut<'a, K, N> {
+impl<'a, K, N> CursorMut<'a, K, N>
+where
+  K: Clone,
+{
   /// Returns a read-only cursor pointing to the current pair.
   ///
   /// The lifetime of the returned [`Cursor`] is bound to that of the
@@ -184,7 +193,7 @@ impl<'a, K, N> CursorMut<'a, K, N> {
   pub fn as_cursor(&self) -> Cursor<K, N> {
     Cursor {
       list: self.list,
-      key: self.key,
+      key: self.key.clone(),
     }
   }
 }
