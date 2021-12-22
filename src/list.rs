@@ -1,5 +1,5 @@
 use crate::cursor::{Cursor, CursorMut};
-use crate::iter::{IntoIter, Iter, Keys, Nodes};
+use crate::iter::{IntoIter, IntoKeys, IntoNodes, Iter, Keys, Nodes};
 use crate::map::Map;
 use crate::node::Node;
 use crate::{node_next_mut, node_prev_mut};
@@ -75,6 +75,7 @@ where
   }
 
   /// Returns an iterator over all keys and nodes.
+  /// The iterator element type is `(&'a K, &'a N)`.
   #[inline]
   pub fn iter(&self) -> Iter<K, N, M> {
     Iter {
@@ -84,12 +85,14 @@ where
   }
 
   /// Returns an iterator over all keys.
+  /// The iterator element type is `&'a K`.
   #[inline]
   pub fn keys(&self) -> Keys<K, N, M> {
     Keys { iter: self.iter() }
   }
 
   /// Returns an iterator over all nodes.
+  /// The iterator element type is `&'a N`.
   #[inline]
   pub fn nodes(&self) -> Nodes<K, N, M> {
     Nodes { iter: self.iter() }
@@ -263,6 +266,26 @@ where
   N: Node<Key = K>,
   M: Map<K, N>,
 {
+  /// Creates a consuming iterator over all keys.
+  /// The list cannot be used after calling this.
+  /// The iterator element type is `K`.
+  #[inline]
+  pub fn into_keys(self) -> IntoKeys<K, N, M> {
+    IntoKeys {
+      iter: self.into_iter(),
+    }
+  }
+
+  /// Creates a consuming iterator over all nodes.
+  /// The list cannot be used after calling this.
+  /// The iterator element type is `N`.
+  #[inline]
+  pub fn into_nodes(self) -> IntoNodes<K, N, M> {
+    IntoNodes {
+      iter: self.into_iter(),
+    }
+  }
+
   /// Adds an key-node pair first in the list.
   ///
   /// If `key` already exists, returns an error containing `key` and `node`.
