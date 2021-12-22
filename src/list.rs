@@ -74,12 +74,6 @@ where
     self.tail = None;
   }
 
-  /// Creates an iterator from the list.
-  #[inline]
-  pub fn into_iter(self) -> IntoIter<K, N, M> {
-    IntoIter { list: self }
-  }
-
   /// Returns an iterator over all keys and nodes.
   #[inline]
   pub fn iter(&self) -> Iter<K, N, M> {
@@ -400,7 +394,7 @@ where
   type IntoIter = IntoIter<K, N, M>;
 
   fn into_iter(self) -> Self::IntoIter {
-    self.into_iter()
+    IntoIter { list: self }
   }
 }
 
