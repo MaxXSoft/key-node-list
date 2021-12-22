@@ -7,14 +7,17 @@
 mod cursor;
 mod iter;
 mod list;
+mod map;
 mod node;
 
 pub use cursor::*;
 pub use iter::*;
 pub use list::*;
+pub use map::*;
 pub use node::*;
 
-/// A [`KeyNodeList`] that uses [`GenericNode<K, V>`] as its node type.
+/// A [`KeyNodeList`] that uses [`GenericNode<K, V>`] as its node type and
+/// [`HashMap`](std::collections::HashMap) as its underlying hash map.
 ///
 /// `KeyValueList` can store key-value pairs and organize them in the form
 /// of a doubly-linked list.
