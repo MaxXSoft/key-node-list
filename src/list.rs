@@ -64,7 +64,7 @@ where
   /// This operation should compute in *O*(1) time.
   #[inline]
   pub fn is_empty(&self) -> bool {
-    self.nodes.is_empty()
+    self.nodes.len() == 0
   }
 
   /// Removes all key-node pairs in the list.
@@ -125,7 +125,7 @@ where
     K: Borrow<Q>,
     Q: Hash + Eq,
   {
-    self.nodes.contains_key(key)
+    self.nodes.get(key).is_some()
   }
 
   /// Returns a reference to the node corresponding to the key,
@@ -337,7 +337,7 @@ where
   /// This operation should compute in *O*(1) time on average.
   pub fn pop_front(&mut self) -> Option<(K, N)> {
     self.head.take().map(|k| {
-      let node = self.nodes.remove(&k).unwrap();
+      let (_, node) = self.nodes.remove_entry(&k).unwrap();
       self.head = node.next().cloned();
       (k, node)
     })
@@ -349,7 +349,7 @@ where
   /// This operation should compute in *O*(1) time on average.
   pub fn pop_back(&mut self) -> Option<(K, N)> {
     self.tail.take().map(|k| {
-      let node = self.nodes.remove(&k).unwrap();
+      let (_, node) = self.nodes.remove_entry(&k).unwrap();
       self.tail = node.prev().cloned();
       (k, node)
     })
