@@ -1,12 +1,13 @@
 use crate::list::KeyNodeList;
+use crate::map::Map;
 use crate::node::Node;
 use crate::{node_next_mut, node_prev_mut};
 use std::fmt;
 use std::hash::Hash;
 
 macro_rules! impl_cursor {
-  ($name:ident<$a:lifetime, $k:ident, $n:ident>($list:ident, $key:ident)) => {
-    impl<$a, $k, $n> $name<$a, $k, $n> {
+  ($name:ident<$a:lifetime, $k:ident, $n:ident, $m:ident>($list:ident, $key:ident)) => {
+    impl<$a, $k, $n, $m> $name<$a, $k, $n, $m> {
       /// Checks if the cursor is currently pointing to the null pair.
       #[inline]
       pub fn is_null(&self) -> bool {
@@ -36,9 +37,10 @@ macro_rules! impl_cursor {
       }
     }
 
-    impl<$a, $k, $n> $name<$a, $k, $n>
+    impl<$a, $k, $n, $m> $name<$a, $k, $n, $m>
     where
       $k: Hash + Eq,
+      $m: Map<K, N>,
     {
       /// Returns a reference to the node that the cursor is currently pointing to.
       ///
@@ -63,10 +65,11 @@ macro_rules! impl_cursor {
       }
     }
 
-    impl<$a, $k, $n> $name<$a, $k, $n>
+    impl<$a, $k, $n, $m> $name<$a, $k, $n, $m>
     where
       $k: Hash + Eq,
       $n: Node<Key = $k>,
+      $m: Map<K, N>,
     {
       /// Returns a reference to the next key.
       ///
@@ -115,10 +118,11 @@ macro_rules! impl_cursor {
       }
     }
 
-    impl<$a, $k, $n> $name<$a, $k, $n>
+    impl<$a, $k, $n, $m> $name<$a, $k, $n, $m>
     where
       $k: Hash + Eq + Clone,
       $n: Node<Key = $k>,
+      $m: Map<K, N>,
     {
       /// Moves the cursor to the next key-node pair of the [`KeyNodeList`].
       ///
@@ -149,10 +153,11 @@ macro_rules! impl_cursor {
       }
     }
 
-    impl<$a, $k, $n> fmt::Debug for $name<$a, $k, $n>
+    impl<$a, $k, $n, $m> fmt::Debug for $name<$a, $k, $n, $m>
     where
       $k: Hash + Eq + fmt::Debug,
       $n: Node<Key = $k> + fmt::Debug,
+      $m: Map<K, N>,
     {
       fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_tuple(stringify!($name))
@@ -166,22 +171,22 @@ macro_rules! impl_cursor {
 
 /// A cursor over a [`KeyNodeList`].
 #[derive(Clone)]
-pub struct Cursor<'a, K, N> {
-  pub(crate) list: &'a KeyNodeList<K, N>,
+pub struct Cursor<'a, K, N, M> {
+  pub(crate) list: &'a KeyNodeList<K, N, M>,
   pub(crate) key: Option<K>,
 }
 
-impl_cursor!(Cursor<'a, K, N>(list, key));
+impl_cursor!(Cursor<'a, K, N, M>(list, key));
 
 /// A cursor over a [`KeyNodeList`] with editing operations.
-pub struct CursorMut<'a, K, N> {
-  pub(crate) list: &'a mut KeyNodeList<K, N>,
+pub struct CursorMut<'a, K, N, M> {
+  pub(crate) list: &'a mut KeyNodeList<K, N, M>,
   pub(crate) key: Option<K>,
 }
 
-impl_cursor!(CursorMut<'a, K, N>(list, key));
+impl_cursor!(CursorMut<'a, K, N, M>(list, key));
 
-impl<'a, K, N> CursorMut<'a, K, N>
+impl<'a, K, N, M> CursorMut<'a, K, N, M>
 where
   K: Clone,
 {
@@ -191,7 +196,7 @@ where
   /// [`CursorMut`], which means it cannot outlive the [`CursorMut`] and that
   /// the [`CursorMut`] is frozen for the lifetime of the [`Cursor`].
   #[inline]
-  pub fn as_cursor(&self) -> Cursor<K, N> {
+  pub fn as_cursor(&self) -> Cursor<K, N, M> {
     Cursor {
       list: self.list,
       key: self.key.clone(),
@@ -199,9 +204,10 @@ where
   }
 }
 
-impl<'a, K, N> CursorMut<'a, K, N>
+impl<'a, K, N, M> CursorMut<'a, K, N, M>
 where
   K: Hash + Eq,
+  M: Map<K, N>,
 {
   /// Provides a mutable reference to the front node of the cursor’s parent
   /// list, or `None` if the list is empty.
@@ -226,10 +232,11 @@ where
   }
 }
 
-impl<'a, K, N> CursorMut<'a, K, N>
+impl<'a, K, N, M> CursorMut<'a, K, N, M>
 where
   K: Hash + Eq + Clone,
   N: Node<Key = K>,
+  M: Map<K, N>,
 {
   /// Inserts a new key-node pair into the [`KeyNodeList`] after the current one.
   ///
