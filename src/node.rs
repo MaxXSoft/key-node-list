@@ -55,54 +55,54 @@ macro_rules! impl_node {
 
 /// A generic node for the [`KeyNodeList`].
 ///
-/// `GenericNode` can hold any kind of data.
+/// `GenericNode` can hold any kind of value.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct GenericNode<K, T> {
-  data: T,
+pub struct GenericNode<K, V> {
+  value: V,
   prev: Option<K>,
   next: Option<K>,
 }
 
-impl_node!(GenericNode<K, T> { Key = K, prev = prev, next = next});
+impl_node!(GenericNode<K, V> { Key = K, prev = prev, next = next});
 
-impl<K, T> GenericNode<K, T> {
-  /// Creates a new node with `data`.
-  pub fn new(data: T) -> Self {
+impl<K, V> GenericNode<K, V> {
+  /// Creates a new node with `value`.
+  pub fn new(value: V) -> Self {
     Self {
-      data,
+      value,
       prev: None,
       next: None,
     }
   }
 
-  /// Consumes this [`GenericNode`], returning the underlying data.
-  pub fn into_data(self) -> T {
-    self.data
+  /// Consumes this [`GenericNode`], returning the underlying value.
+  pub fn into_value(self) -> V {
+    self.value
   }
 
-  /// Returns a reference to the node data.
-  pub fn data(&self) -> &T {
-    &self.data
+  /// Returns a reference to the node value.
+  pub fn value(&self) -> &V {
+    &self.value
   }
 
-  /// Returns a mutable reference to the node data.
-  pub fn data_mut(&mut self) -> &mut T {
-    &mut self.data
+  /// Returns a mutable reference to the node value.
+  pub fn value_mut(&mut self) -> &mut V {
+    &mut self.value
   }
 }
 
-impl<K, T> Default for GenericNode<K, T>
+impl<K, V> Default for GenericNode<K, V>
 where
-  T: Default,
+  V: Default,
 {
   fn default() -> Self {
-    Self::new(T::default())
+    Self::new(V::default())
   }
 }
 
-impl<K, T> From<T> for GenericNode<K, T> {
-  fn from(data: T) -> Self {
-    Self::new(data)
+impl<K, V> From<V> for GenericNode<K, V> {
+  fn from(value: V) -> Self {
+    Self::new(value)
   }
 }
 
