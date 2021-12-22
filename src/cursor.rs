@@ -259,14 +259,18 @@ where
         None => self.list.head.replace(key.clone()),
       };
       // update the next node at the insertion position
-      match next {
+      match &next {
         // next node has key `k`, update its `prev` pointer
-        Some(k) => *node_prev_mut!(self.list, &k) = Some(key.clone()),
+        Some(k) => *node_prev_mut!(self.list, k) = Some(key.clone()),
         // next node is the null pair, update the tail pointer
         None => self.list.tail = Some(key.clone()),
       }
+      // update node's previous pointer and next pointer
+      let mut node = node.into();
+      *node_prev_mut!(node) = self.key.clone();
+      *node_next_mut!(node) = next;
       // insert key-node pair to the node map
-      self.list.nodes.insert(key, node.into());
+      self.list.nodes.insert(key, node);
       Ok(())
     }
   }
@@ -292,14 +296,18 @@ where
         None => self.list.tail.replace(key.clone()),
       };
       // update the previous node at the insertion position
-      match prev {
+      match &prev {
         // previous node has key `k`, update its `next` pointer
-        Some(k) => *node_next_mut!(self.list, &k) = Some(key.clone()),
+        Some(k) => *node_next_mut!(self.list, k) = Some(key.clone()),
         // previous node is the null pair, update the head pointer
         None => self.list.head = Some(key.clone()),
       }
+      // update node's previous pointer and next pointer
+      let mut node = node.into();
+      *node_prev_mut!(node) = prev;
+      *node_next_mut!(node) = self.key.clone();
       // insert key-node pair to the node map
-      self.list.nodes.insert(key, node.into());
+      self.list.nodes.insert(key, node);
       Ok(())
     }
   }

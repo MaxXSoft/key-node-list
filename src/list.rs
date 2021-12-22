@@ -295,11 +295,15 @@ where
     if self.contains_key(&key) {
       Err((key, node))
     } else {
-      match self.head.replace(key.clone()) {
-        Some(k) => *node_prev_mut!(self, &k) = Some(key.clone()),
+      let next = self.head.replace(key.clone());
+      match &next {
+        Some(k) => *node_prev_mut!(self, k) = Some(key.clone()),
         None => self.tail = Some(key.clone()),
       }
-      self.nodes.insert(key, node.into());
+      let mut node = node.into();
+      *node_prev_mut!(node) = None;
+      *node_next_mut!(node) = next;
+      self.nodes.insert(key, node);
       Ok(())
     }
   }
@@ -313,11 +317,15 @@ where
     if self.contains_key(&key) {
       Err((key, node))
     } else {
-      match self.tail.replace(key.clone()) {
-        Some(k) => *node_next_mut!(self, &k) = Some(key.clone()),
+      let prev = self.tail.replace(key.clone());
+      match &prev {
+        Some(k) => *node_next_mut!(self, k) = Some(key.clone()),
         None => self.head = Some(key.clone()),
       }
-      self.nodes.insert(key, node.into());
+      let mut node = node.into();
+      *node_prev_mut!(node) = prev;
+      *node_next_mut!(node) = None;
+      self.nodes.insert(key, node);
       Ok(())
     }
   }
