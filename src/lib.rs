@@ -18,7 +18,7 @@ pub use node::*;
 macro_rules! node_prev_mut {
   ($list:expr, $key:expr) => {
     $list
-      .node_mut($key)
+      .node_mut::<K>($key)
       .unwrap()
       .prev_mut::<$crate::node::Token>()
   };
@@ -29,7 +29,7 @@ pub(crate) use node_prev_mut;
 macro_rules! node_next_mut {
   ($list:expr, $key:expr) => {
     $list
-      .node_mut($key)
+      .node_mut::<K>($key)
       .unwrap()
       .next_mut::<$crate::node::Token>()
   };
