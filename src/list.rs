@@ -1,26 +1,37 @@
 use crate::cursor::{Cursor, CursorMut};
 use crate::iter::{IntoIter, Iter, Keys, Nodes};
+use crate::map::Map;
 use crate::node::Node;
 use crate::{node_next_mut, node_prev_mut};
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
+use std::marker::PhantomData;
 use std::ops::Index;
 
-/// A linked list with key-node form.
+/// A doubly-linked list that stores key-node pairs.
 #[derive(Clone)]
-pub struct KeyNodeList<K, N> {
-  pub(crate) nodes: HashMap<K, N>,
+pub struct KeyNodeList<K, N, M = HashMap<K, N>> {
+  pub(crate) nodes: M,
   pub(crate) head: Option<K>,
   pub(crate) tail: Option<K>,
+  phantom: PhantomData<N>,
 }
 
-impl<K, N> KeyNodeList<K, N> {
-  /// Creates an empty linked list.
+impl<K, N, M> KeyNodeList<K, N, M>
+where
+  M: Map<K, N>,
+{
+  /// Creates an linked list with the given hash map `map`.
   #[inline]
-  pub fn new() -> Self {
-    Self::default()
+  pub fn with_map(map: M) -> Self {
+    Self {
+      nodes: map,
+      head: None,
+      tail: None,
+      phantom: PhantomData,
+    }
   }
 
   /// Returns a reference to the front key, or `None` if the list is empty.
@@ -65,13 +76,13 @@ impl<K, N> KeyNodeList<K, N> {
 
   /// Creates an iterator from the list.
   #[inline]
-  pub fn into_iter(self) -> IntoIter<K, N> {
+  pub fn into_iter(self) -> IntoIter<K, N, M> {
     IntoIter { list: self }
   }
 
   /// Returns an iterator over all keys and nodes.
   #[inline]
-  pub fn iter(&self) -> Iter<K, N> {
+  pub fn iter(&self) -> Iter<K, N, M> {
     Iter {
       list: self,
       key: self.head.as_ref(),
@@ -80,20 +91,32 @@ impl<K, N> KeyNodeList<K, N> {
 
   /// Returns an iterator over all keys.
   #[inline]
-  pub fn keys(&self) -> Keys<K, N> {
+  pub fn keys(&self) -> Keys<K, N, M> {
     Keys { iter: self.iter() }
   }
 
   /// Returns an iterator over all nodes.
   #[inline]
-  pub fn nodes(&self) -> Nodes<K, N> {
+  pub fn nodes(&self) -> Nodes<K, N, M> {
     Nodes { iter: self.iter() }
   }
 }
 
-impl<K, N> KeyNodeList<K, N>
+impl<K, N, M> KeyNodeList<K, N, M>
+where
+  M: Map<K, N> + Default,
+{
+  /// Creates an empty linked list.
+  #[inline]
+  pub fn new() -> Self {
+    Self::default()
+  }
+}
+
+impl<K, N, M> KeyNodeList<K, N, M>
 where
   K: Hash + Eq,
+  M: Map<K, N>,
 {
   /// Returns `true` if the linked list contains a node for the specified key.
   ///
@@ -171,7 +194,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the key does not exist.
   #[inline]
-  pub fn cursor(&self, key: K) -> Cursor<K, N> {
+  pub fn cursor(&self, key: K) -> Cursor<K, N, M> {
     Cursor {
       list: self,
       key: self.contains_key(&key).then(|| key),
@@ -182,7 +205,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the key does not exist.
   #[inline]
-  pub fn cursor_mut(&mut self, key: K) -> CursorMut<K, N> {
+  pub fn cursor_mut(&mut self, key: K) -> CursorMut<K, N, M> {
     CursorMut {
       key: self.contains_key(&key).then(|| key),
       list: self,
@@ -190,15 +213,16 @@ where
   }
 }
 
-impl<K, N> KeyNodeList<K, N>
+impl<K, N, M> KeyNodeList<K, N, M>
 where
   K: Hash + Eq + Clone,
+  M: Map<K, N>,
 {
   /// Provides a cursor at the front key-node pair.
   ///
   /// The cursor is pointing to the null pair if the list is empty.
   #[inline]
-  pub fn cursor_front(&self) -> Cursor<K, N> {
+  pub fn cursor_front(&self) -> Cursor<K, N, M> {
     Cursor {
       list: self,
       key: self.head.clone(),
@@ -209,7 +233,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the list is empty.
   #[inline]
-  pub fn cursor_front_mut(&mut self) -> CursorMut<K, N> {
+  pub fn cursor_front_mut(&mut self) -> CursorMut<K, N, M> {
     CursorMut {
       key: self.head.clone(),
       list: self,
@@ -220,7 +244,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the list is empty.
   #[inline]
-  pub fn cursor_back(&self) -> Cursor<K, N> {
+  pub fn cursor_back(&self) -> Cursor<K, N, M> {
     Cursor {
       list: self,
       key: self.tail.clone(),
@@ -231,7 +255,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the list is empty.
   #[inline]
-  pub fn cursor_back_mut(&mut self) -> CursorMut<K, N> {
+  pub fn cursor_back_mut(&mut self) -> CursorMut<K, N, M> {
     CursorMut {
       key: self.tail.clone(),
       list: self,
@@ -239,10 +263,11 @@ where
   }
 }
 
-impl<K, N> KeyNodeList<K, N>
+impl<K, N, M> KeyNodeList<K, N, M>
 where
   K: Hash + Eq + Clone,
   N: Node<Key = K>,
+  M: Map<K, N>,
 {
   /// Adds an key-node pair first in the list.
   ///
@@ -325,59 +350,68 @@ where
   }
 }
 
-impl<K, N> fmt::Debug for KeyNodeList<K, N>
+impl<K, N, M> fmt::Debug for KeyNodeList<K, N, M>
 where
   K: Hash + Eq + fmt::Debug,
   N: Node<Key = K> + fmt::Debug,
+  M: Map<K, N>,
 {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     f.debug_list().entries(self).finish()
   }
 }
 
-impl<K, N> Default for KeyNodeList<K, N> {
+impl<K, N, M> Default for KeyNodeList<K, N, M>
+where
+  M: Map<K, N> + Default,
+{
   #[inline]
   fn default() -> Self {
     KeyNodeList {
-      nodes: HashMap::default(),
+      nodes: M::default(),
       head: None,
       tail: None,
+      phantom: PhantomData,
     }
   }
 }
 
-impl<K, N> Index<&K> for KeyNodeList<K, N>
+impl<'a, K, Q, N, M> Index<&'a Q> for KeyNodeList<K, N, M>
 where
-  K: Hash + Eq,
+  K: Hash + Eq + Borrow<Q>,
+  Q: ?Sized + Hash + Eq,
+  M: Map<K, N> + Index<&'a Q, Output = N>,
 {
   type Output = N;
 
   #[inline]
-  fn index(&self, key: &K) -> &Self::Output {
+  fn index(&self, key: &'a Q) -> &Self::Output {
     self.nodes.index(key)
   }
 }
 
-impl<K, N> IntoIterator for KeyNodeList<K, N>
+impl<K, N, M> IntoIterator for KeyNodeList<K, N, M>
 where
   K: Hash + Eq + Clone,
   N: Node<Key = K>,
+  M: Map<K, N>,
 {
   type Item = (K, N);
-  type IntoIter = IntoIter<K, N>;
+  type IntoIter = IntoIter<K, N, M>;
 
   fn into_iter(self) -> Self::IntoIter {
     self.into_iter()
   }
 }
 
-impl<'a, K, N> IntoIterator for &'a KeyNodeList<K, N>
+impl<'a, K, N, M> IntoIterator for &'a KeyNodeList<K, N, M>
 where
   K: Hash + Eq,
   N: Node<Key = K>,
+  M: Map<K, N>,
 {
   type Item = (&'a K, &'a N);
-  type IntoIter = Iter<'a, K, N>;
+  type IntoIter = Iter<'a, K, N, M>;
 
   fn into_iter(self) -> Self::IntoIter {
     self.iter()
