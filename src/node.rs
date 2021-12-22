@@ -58,17 +58,17 @@ macro_rules! impl_node {
 
 /// A generic node for the [`KeyNodeList`](crate::KeyNodeList).
 ///
-/// `GenericNode` can hold any kind of value.
+/// `ValueNode` can hold any kind of value.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct GenericNode<K, V> {
+pub struct ValueNode<K, V> {
   value: V,
   prev: Option<K>,
   next: Option<K>,
 }
 
-impl_node!(GenericNode<K, V> { Key = K, prev = prev, next = next});
+impl_node!(ValueNode<K, V> { Key = K, prev = prev, next = next});
 
-impl<K, V> GenericNode<K, V> {
+impl<K, V> ValueNode<K, V> {
   /// Creates a new node with `value`.
   pub fn new(value: V) -> Self {
     Self {
@@ -78,7 +78,7 @@ impl<K, V> GenericNode<K, V> {
     }
   }
 
-  /// Consumes this [`GenericNode`], returning the underlying value.
+  /// Consumes this [`ValueNode`], returning the underlying value.
   pub fn into_value(self) -> V {
     self.value
   }
@@ -94,7 +94,7 @@ impl<K, V> GenericNode<K, V> {
   }
 }
 
-impl<K, V> Default for GenericNode<K, V>
+impl<K, V> Default for ValueNode<K, V>
 where
   V: Default,
 {
@@ -103,7 +103,7 @@ where
   }
 }
 
-impl<K, V> From<V> for GenericNode<K, V> {
+impl<K, V> From<V> for ValueNode<K, V> {
   fn from(value: V) -> Self {
     Self::new(value)
   }
