@@ -9,6 +9,103 @@
 //! You can complete key lookups, key-node pair updates, key-node pair
 //! deletions and other operations of [`KeyNodeList`] in *O*(1)~ time. You
 //! can also use cursor-based interface to traverse or edit the linked list.
+//!
+//! # Examples
+//!
+//! ## Organizing key-value pairs using `KeyValueList`
+//!
+//! ```
+//! use key_node_list::KeyValueList;
+//!
+//! // construct key-value list from tuple array
+//! let mut list = KeyValueList::from([(1, "Reimu"), (2, "Marisa")]);
+//!
+//! // or pushing other key-value pairs to the front/back of list
+//! list.push_front(0, "Alice").unwrap();
+//! list.push_back(3, "Patchouli").unwrap();
+//!
+//! // query nodes by key
+//! assert_eq!(list[&1].value(), &"Reimu");
+//! assert_eq!(list[&0].value(), &"Alice");
+//!
+//! // also you can update nodes by key
+//! *list.node_mut(&3).unwrap().value_mut() = "Youmu";
+//! *list.front_node_mut().unwrap().value_mut() = "Mokou";
+//! assert_eq!(list[&3].value(), &"Youmu");
+//! assert_eq!(list[&0].value(), &"Mokou");
+//! assert_eq!(list.front_node().unwrap().value(), &"Mokou");
+//!
+//! // remove some key-node pairs
+//! assert!(list.pop_front().is_some());
+//! assert!(list.remove(&2).is_some());
+//!
+//! // all key-node pairs are in order
+//! list.push_back(5, "Yuyuko");
+//! let vec: Vec<_> = list.into_iter().map(|(k, n)| (k, n.into_value())).collect();
+//! assert_eq!(vec, [(1, "Reimu"), (3, "Youmu"), (5, "Yuyuko")]);
+//! ```
+//!
+//! ## Editing list using cursors
+//!
+//! ```
+//! use key_node_list::KeyValueList;
+//!
+//! let mut first_name = KeyValueList::from([
+//!   (1, "Reimu".to_string()),
+//!   (2, "Marisa".to_string()),
+//! ]);
+//!
+//! let last_name = KeyValueList::from([(1, "Hakurei"), (2, "Kirisame")]);
+//!
+//! // append last names after first names
+//! let mut first_cur = first_name.cursor_front_mut();
+//! let mut last_cur = last_name.cursor_front();
+//! while let Some(node) = first_cur.node_mut() {
+//!   node.value_mut().push(' ');
+//!   node.value_mut().push_str(last_cur.node().unwrap().value());
+//!   first_cur.move_next();
+//!   last_cur.move_next();
+//! }
+//!
+//! let vec: Vec<_> = first_name.iter().map(|(k, n)| (k, n.value().as_str())).collect();
+//! assert_eq!(vec, [(&1, "Reimu Hakurei"), (&2, "Marisa Kirisame")]);
+//! ```
+//!
+//! ## Customizing your own nodes
+//!
+//! ```
+//! use key_node_list::{Node, impl_node};
+//! use key_node_list::KeyNodeList;
+//! 
+//! struct NameNode<'a> {
+//!   first: &'a str,
+//!   last: &'a str,
+//!   prev: Option<i32>,
+//!   next: Option<i32>,
+//! }
+//! 
+//! impl<'a> From<(&'a str, &'a str)> for NameNode<'a> {
+//!   fn from(name: (&'a str, &'a str)) -> Self {
+//!     let (first, last) = name;
+//!     Self {
+//!       first,
+//!       last,
+//!       prev: None,
+//!       next: None,
+//!     }
+//!   }
+//! }
+//! 
+//! // implements `Node` trait for `NameNode`
+//! impl_node!(NameNode<'a> { Key = i32, prev = prev, next = next });
+//! 
+//! // create a `KeyNodeList` with node type `NameNode`
+//! let mut names: KeyNodeList<_, NameNode> = KeyNodeList::new();
+//! names.push_back(1, ("Reimu", "Hakurei"));
+//! names.push_back(2, ("Marisa", "Kirisame"));
+//! assert_eq!(names[&1].first, "Reimu");
+//! assert_eq!(names[&2].last, "Kirisame");
+//! ```
 
 mod cursor;
 mod iter;
@@ -22,12 +119,12 @@ pub use list::*;
 pub use map::*;
 pub use node::*;
 
-/// A [`KeyNodeList`] that uses [`GenericNode<K, V>`] as its node type and
+/// A [`KeyNodeList`] that uses [`ValueNode<K, V>`] as its node type and
 /// [`HashMap`](std::collections::HashMap) as its underlying hash map.
 ///
 /// `KeyValueList` stores key-value pairs and organize them in the form of
 /// a doubly-linked list.
-pub type KeyValueList<K, V> = KeyNodeList<K, GenericNode<K, V>>;
+pub type KeyValueList<K, V> = KeyNodeList<K, ValueNode<K, V>>;
 
 /// Gets a mutable reference of the previous pointer of the specific node.
 macro_rules! node_prev_mut {
