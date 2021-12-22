@@ -1,16 +1,18 @@
 use crate::list::KeyNodeList;
+use crate::map::Map;
 use crate::node::Node;
 use std::hash::Hash;
 
 /// An owning iterator over the key-node paris of a [`KeyNodeList`].
-pub struct IntoIter<K, N> {
-  pub(crate) list: KeyNodeList<K, N>,
+pub struct IntoIter<K, N, M> {
+  pub(crate) list: KeyNodeList<K, N, M>,
 }
 
-impl<K, N> Iterator for IntoIter<K, N>
+impl<K, N, M> Iterator for IntoIter<K, N, M>
 where
   K: Hash + Eq + Clone,
   N: Node<Key = K>,
+  M: Map<K, N>,
 {
   type Item = (K, N);
 
@@ -21,15 +23,16 @@ where
 }
 
 /// An iterator over the key-node pairs of a [`KeyNodeList`].
-pub struct Iter<'a, K, N> {
-  pub(crate) list: &'a KeyNodeList<K, N>,
+pub struct Iter<'a, K, N, M> {
+  pub(crate) list: &'a KeyNodeList<K, N, M>,
   pub(crate) key: Option<&'a K>,
 }
 
-impl<'a, K, N> Iterator for Iter<'a, K, N>
+impl<'a, K, N, M> Iterator for Iter<'a, K, N, M>
 where
   K: Hash + Eq,
   N: Node<Key = K>,
+  M: Map<K, N>,
 {
   type Item = (&'a K, &'a N);
 
@@ -45,14 +48,15 @@ where
 }
 
 /// An iterator over the keys of a [`KeyNodeList`].
-pub struct Keys<'a, K, N> {
-  pub(crate) iter: Iter<'a, K, N>,
+pub struct Keys<'a, K, N, M> {
+  pub(crate) iter: Iter<'a, K, N, M>,
 }
 
-impl<'a, K, N> Iterator for Keys<'a, K, N>
+impl<'a, K, N, M> Iterator for Keys<'a, K, N, M>
 where
   K: Hash + Eq,
   N: Node<Key = K>,
+  M: Map<K, N>,
 {
   type Item = &'a K;
 
@@ -63,14 +67,15 @@ where
 }
 
 /// An iterator over the nodes of a [`KeyNodeList`].
-pub struct Nodes<'a, K, N> {
-  pub(crate) iter: Iter<'a, K, N>,
+pub struct Nodes<'a, K, N, M> {
+  pub(crate) iter: Iter<'a, K, N, M>,
 }
 
-impl<'a, K, N> Iterator for Nodes<'a, K, N>
+impl<'a, K, N, M> Iterator for Nodes<'a, K, N, M>
 where
   K: Hash + Eq,
   N: Node<Key = K>,
+  M: Map<K, N>,
 {
   type Item = &'a N;
 
