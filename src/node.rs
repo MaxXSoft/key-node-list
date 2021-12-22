@@ -27,7 +27,7 @@ pub trait Node {
 #[macro_export]
 macro_rules! impl_node {
   (
-    $node:ident$(<$($g:ident),* $(,)?>)?
+    $node:ident$(<$($g:tt),* $(,)?>)?
     { Key = $key:ty, prev = $prev:ident, next = $next:ident $(,)? }
   ) => {
     impl$(<$($g),*>)? $crate::Node for $node$(<$($g),*>)? {
@@ -44,12 +44,12 @@ macro_rules! impl_node {
       }
 
       #[inline]
-      fn prev_mut<__: NodeToken>(&mut self) -> &mut Option<Self::Key> {
+      fn prev_mut<__: $crate::NodeToken>(&mut self) -> &mut Option<Self::Key> {
         &mut self.$prev
       }
 
       #[inline]
-      fn next_mut<__: NodeToken>(&mut self) -> &mut Option<Self::Key> {
+      fn next_mut<__: $crate::NodeToken>(&mut self) -> &mut Option<Self::Key> {
         &mut self.$next
       }
     }
