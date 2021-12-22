@@ -1,4 +1,5 @@
-/// Trait for nodes that holds its previous and next key in [`KeyNodeList`].
+/// Trait for nodes that holds its previous and next key in
+/// [`KeyNodeList`](crate::KeyNodeList).
 pub trait Node {
   /// Key type of the current `Node`.
   type Key;
@@ -12,11 +13,13 @@ pub trait Node {
   fn next(&self) -> Option<&Self::Key>;
 
   /// Returns a mutable reference to the previous key of the current node
-  /// so that [`KeyNodeList`] can update the order of the nodes.
+  /// so that [`KeyNodeList`](crate::KeyNodeList) can update the order of
+  /// the nodes.
   fn prev_mut<T: NodeToken>(&mut self) -> &mut Option<Self::Key>;
 
   /// Returns a mutable reference to the next key of the current node
-  /// so that [`KeyNodeList`] can update the order of the nodes.
+  /// so that [`KeyNodeList`](crate::KeyNodeList) can update the order of
+  /// the nodes.
   fn next_mut<T: NodeToken>(&mut self) -> &mut Option<Self::Key>;
 }
 
@@ -53,7 +56,7 @@ macro_rules! impl_node {
   };
 }
 
-/// A generic node for the [`KeyNodeList`].
+/// A generic node for the [`KeyNodeList`](crate::KeyNodeList).
 ///
 /// `GenericNode` can hold any kind of value.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
