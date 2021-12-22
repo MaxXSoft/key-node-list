@@ -64,7 +64,7 @@ where
   /// This operation should compute in *O*(1) time.
   #[inline]
   pub fn is_empty(&self) -> bool {
-    self.nodes.len() == 0
+    self.nodes.is_empty()
   }
 
   /// Removes all key-node pairs in the list.

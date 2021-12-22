@@ -164,22 +164,22 @@ mod test {
     assert_eq!(list.front_key(), None);
     assert_eq!(list.back_key(), None);
     assert_eq!(list.len(), 0);
-    assert_eq!(list.is_empty(), true);
+    assert!(list.is_empty());
     list.push_back(1, 1).unwrap();
     assert_eq!(list.front_key(), Some(&1));
     assert_eq!(list.back_key(), Some(&1));
     assert_eq!(list.len(), 1);
-    assert_eq!(list.is_empty(), false);
+    assert!(!list.is_empty());
     list.push_back(2, 2).unwrap();
     assert_eq!(list.front_key(), Some(&1));
     assert_eq!(list.back_key(), Some(&2));
     assert_eq!(list.len(), 2);
-    assert_eq!(list.is_empty(), false);
+    assert!(!list.is_empty());
     list.clear();
     assert_eq!(list.front_key(), None);
     assert_eq!(list.back_key(), None);
     assert_eq!(list.len(), 0);
-    assert_eq!(list.is_empty(), true);
+    assert!(list.is_empty());
   }
 
   #[test]

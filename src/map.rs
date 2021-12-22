@@ -17,6 +17,14 @@ pub trait Map<K, V> {
   /// Keeps the allocated memory for reuse.
   fn clear(&mut self);
 
+  /// Returns `true` if the map contains no elements.
+  ///
+  /// This operation should compute in *O*(1) time.
+  #[inline]
+  fn is_empty(&self) -> bool {
+    self.len() == 0
+  }
+
   /// Returns a reference to the value corresponding to the key.
   ///
   /// The key may be any borrowed form of the map’s key type, but [`Hash`]
