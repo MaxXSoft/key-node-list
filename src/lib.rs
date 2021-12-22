@@ -186,4 +186,13 @@ mod test {
     }
     assert_eq!(cur.prev_key(), Some(&30));
   }
+
+  #[test]
+  fn test_from_eq() {
+    let list1 = KeyValueList::from([(1, 1), (2, 2), (3, 3)]);
+    let list2 = KeyValueList::from([(1, 1), (2, 2), (3, 3)]);
+    let list3 = KeyValueList::from([(1, 1), (2, 2), (3, 4)]);
+    assert_eq!(list1, list2);
+    assert_ne!(list1, list3);
+  }
 }
