@@ -1,5 +1,6 @@
 use crate::list::KeyNodeList;
-use crate::node::{Node, Token};
+use crate::node::Node;
+use crate::{node_next_mut, node_prev_mut};
 use std::fmt;
 use std::hash::Hash;
 
@@ -225,20 +226,6 @@ where
   }
 }
 
-/// Gets a mutable reference of the previous pointer of the specific node.
-macro_rules! node_prev_mut {
-  ($self:ident, $key:expr) => {
-    $self.list.node_mut($key).unwrap().prev_mut::<Token>()
-  };
-}
-
-/// Gets a mutable reference of the next pointer of the specific node.
-macro_rules! node_next_mut {
-  ($self:ident, $key:expr) => {
-    $self.list.node_mut($key).unwrap().next_mut::<Token>()
-  };
-}
-
 impl<'a, K, N> CursorMut<'a, K, N>
 where
   K: Hash + Eq + Clone,
@@ -259,7 +246,7 @@ where
       let next = match &self.key {
         // cursor points to the key `k`
         // update the `next` pointer of the `k` node
-        Some(k) => node_next_mut!(self, k).replace(key.clone()),
+        Some(k) => node_next_mut!(self.list, k).replace(key.clone()),
         // cursor points to the null pair
         // insert at front of the list, update the head pointer
         None => self.list.head.replace(key.clone()),
@@ -267,7 +254,7 @@ where
       // update the next node at the insertion position
       match next {
         // next node has key `k`, update its `prev` pointer
-        Some(k) => *node_prev_mut!(self, &k) = Some(key.clone()),
+        Some(k) => *node_prev_mut!(self.list, &k) = Some(key.clone()),
         // next node is the null pair, update the tail pointer
         None => self.list.tail = Some(key.clone()),
       }
@@ -292,7 +279,7 @@ where
       let prev = match &self.key {
         // cursor points to the key `k`
         // update the `prev` pointer of the `k` node
-        Some(k) => node_prev_mut!(self, k).replace(key.clone()),
+        Some(k) => node_prev_mut!(self.list, k).replace(key.clone()),
         // cursor points to the null pair
         // insert at end of the list, update the tail pointer
         None => self.list.tail.replace(key.clone()),
@@ -300,7 +287,7 @@ where
       // update the previous node at the insertion position
       match prev {
         // previous node has key `k`, update its `next` pointer
-        Some(k) => *node_next_mut!(self, &k) = Some(key.clone()),
+        Some(k) => *node_next_mut!(self.list, &k) = Some(key.clone()),
         // previous node is the null pair, update the head pointer
         None => self.list.head = Some(key.clone()),
       }
