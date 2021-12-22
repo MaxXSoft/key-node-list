@@ -22,6 +22,44 @@ where
   }
 }
 
+/// An owning iterator over the keys of a [`KeyNodeList`].
+pub struct IntoKeys<K, N, M> {
+  pub(crate) iter: IntoIter<K, N, M>,
+}
+
+impl<K, N, M> Iterator for IntoKeys<K, N, M>
+where
+  K: Hash + Eq + Clone,
+  N: Node<Key = K>,
+  M: Map<K, N>,
+{
+  type Item = K;
+
+  #[inline]
+  fn next(&mut self) -> Option<Self::Item> {
+    self.iter.next().map(|(k, _)| k)
+  }
+}
+
+/// An owning iterator over the nodes of a [`KeyNodeList`].
+pub struct IntoNodes<K, N, M> {
+  pub(crate) iter: IntoIter<K, N, M>,
+}
+
+impl<K, N, M> Iterator for IntoNodes<K, N, M>
+where
+  K: Hash + Eq + Clone,
+  N: Node<Key = K>,
+  M: Map<K, N>,
+{
+  type Item = N;
+
+  #[inline]
+  fn next(&mut self) -> Option<Self::Item> {
+    self.iter.next().map(|(_, n)| n)
+  }
+}
+
 /// An iterator over the key-node pairs of a [`KeyNodeList`].
 pub struct Iter<'a, K, N, M> {
   pub(crate) list: &'a KeyNodeList<K, N, M>,
