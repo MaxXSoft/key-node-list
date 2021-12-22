@@ -1,6 +1,14 @@
 [package]
 name = "key-node-list"
 version = "0.0.1"
+authors = ["MaxXing <x@MaxXSoft.net>"]
 edition = "2021"
+description = "Doubly-linked list that stores key-node pairs."
+readme = "README.md"
+repository = "https://github.com/MaxXSoft/key-node-list"
+documentation = "https://docs.rs/key-node-list"
+license = "GPL-3.0"
+keywords = ["list", "linked-list", "data-structure"]
+categories = ["data-structures"]
 
 [dependencies]
