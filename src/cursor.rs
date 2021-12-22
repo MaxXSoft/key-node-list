@@ -237,7 +237,7 @@ where
   /// at the front of the [`KeyNodeList`].
   ///
   /// If `key` already exists, returns an error containing `key` and `node`.
-  pub fn insert_after(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+  pub fn insert_after<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
     if self.list.contains_key(&key) {
       // `key` already exists
       Err((key, node))
@@ -259,7 +259,7 @@ where
         None => self.list.tail = Some(key.clone()),
       }
       // insert key-node pair to the node map
-      self.list.nodes.insert(key, node);
+      self.list.nodes.insert(key, node.into());
       Ok(())
     }
   }
@@ -270,7 +270,7 @@ where
   /// at the end of the [`KeyNodeList`].
   ///
   /// If `key` already exists, returns an error containing `key` and `node`.
-  pub fn insert_before(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+  pub fn insert_before<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
     if self.list.contains_key(&key) {
       // `key` already exists
       Err((key, node))
@@ -292,7 +292,7 @@ where
         None => self.list.head = Some(key.clone()),
       }
       // insert key-node pair to the node map
-      self.list.nodes.insert(key, node);
+      self.list.nodes.insert(key, node.into());
       Ok(())
     }
   }
@@ -320,7 +320,7 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   #[inline]
-  pub fn push_front(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+  pub fn push_front<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
     self.list.push_front(key, node)
   }
 
@@ -331,7 +331,7 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   #[inline]
-  pub fn push_back(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+  pub fn push_back<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
     self.list.push_back(key, node)
   }
 

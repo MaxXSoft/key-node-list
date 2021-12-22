@@ -249,7 +249,7 @@ where
   /// If `key` already exists, returns an error containing `key` and `node`.
   ///
   /// This operation should compute in *O*(1) time on average.
-  pub fn push_front(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+  pub fn push_front<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
     if self.contains_key(&key) {
       Err((key, node))
     } else {
@@ -257,7 +257,7 @@ where
         Some(k) => *node_prev_mut!(self, &k) = Some(key.clone()),
         None => self.tail = Some(key.clone()),
       }
-      self.nodes.insert(key, node);
+      self.nodes.insert(key, node.into());
       Ok(())
     }
   }
@@ -267,7 +267,7 @@ where
   /// If `key` already exists, returns an error containing `key` and `node`.
   ///
   /// This operation should compute in *O*(1) time on average.
-  pub fn push_back(&mut self, key: K, node: N) -> Result<(), (K, N)> {
+  pub fn push_back<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
     if self.contains_key(&key) {
       Err((key, node))
     } else {
@@ -275,7 +275,7 @@ where
         Some(k) => *node_next_mut!(self, &k) = Some(key.clone()),
         None => self.head = Some(key.clone()),
       }
-      self.nodes.insert(key, node);
+      self.nodes.insert(key, node.into());
       Ok(())
     }
   }
