@@ -209,6 +209,15 @@ where
   K: Hash + Eq,
   M: Map<K, N>,
 {
+  /// Returns a mutable reference to the node that the cursor is currently
+  /// pointing to.
+  ///
+  /// Returns `None` if the cursor is currently pointing to the null pair.
+  #[inline]
+  pub fn node_mut(&mut self) -> Option<&mut N> {
+    self.key.as_ref().and_then(|k| self.list.nodes.get_mut(k))
+  }
+
   /// Provides a mutable reference to the front node of the cursor’s parent
   /// list, or `None` if the list is empty.
   #[inline]
