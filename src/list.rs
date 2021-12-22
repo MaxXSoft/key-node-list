@@ -1,6 +1,7 @@
 use crate::cursor::{Cursor, CursorMut};
 use crate::iter::{IntoIter, Iter, Keys, Nodes};
 use crate::node::Node;
+use crate::{node_next_mut, node_prev_mut};
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fmt;
@@ -249,7 +250,16 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   pub fn push_front(&mut self, key: K, node: N) -> Result<(), (K, N)> {
-    todo!()
+    if self.contains_key(&key) {
+      Err((key, node))
+    } else {
+      match self.head.replace(key.clone()) {
+        Some(k) => *node_prev_mut!(self, &k) = Some(key.clone()),
+        None => self.tail = Some(key.clone()),
+      }
+      self.nodes.insert(key, node);
+      Ok(())
+    }
   }
 
   /// Adds an key-node pair back in the list.
@@ -258,7 +268,16 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   pub fn push_back(&mut self, key: K, node: N) -> Result<(), (K, N)> {
-    todo!()
+    if self.contains_key(&key) {
+      Err((key, node))
+    } else {
+      match self.tail.replace(key.clone()) {
+        Some(k) => *node_next_mut!(self, &k) = Some(key.clone()),
+        None => self.head = Some(key.clone()),
+      }
+      self.nodes.insert(key, node);
+      Ok(())
+    }
   }
 
   /// Removes the first key-node pair and returns it, or `None` if the list
@@ -266,7 +285,11 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   pub fn pop_front(&mut self) -> Option<(K, N)> {
-    todo!()
+    self.head.take().map(|k| {
+      let node = self.nodes.remove(&k).unwrap();
+      self.head = node.next().cloned();
+      (k, node)
+    })
   }
 
   /// Removes the last key-node pair and returns it, or `None` if the list
@@ -274,7 +297,11 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   pub fn pop_back(&mut self) -> Option<(K, N)> {
-    todo!()
+    self.tail.take().map(|k| {
+      let node = self.nodes.remove(&k).unwrap();
+      self.tail = node.prev().cloned();
+      (k, node)
+    })
   }
 
   /// Removes the key-node pair at the given key and returns it,
@@ -284,7 +311,17 @@ where
     K: Borrow<Q>,
     Q: Hash + Eq,
   {
-    todo!()
+    self.nodes.remove_entry(key).map(|(k, n)| {
+      match n.prev() {
+        Some(k) => *node_next_mut!(self, k) = n.next().cloned(),
+        None => self.head = n.next().cloned(),
+      }
+      match n.next() {
+        Some(k) => *node_prev_mut!(self, k) = n.prev().cloned(),
+        None => self.tail = n.prev().cloned(),
+      }
+      (k, n)
+    })
   }
 }
 
