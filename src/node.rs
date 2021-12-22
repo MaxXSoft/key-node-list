@@ -75,6 +75,11 @@ impl<K, T> GenericNode<K, T> {
     }
   }
 
+  /// Consumes this [`GenericNode`], returning the underlying data.
+  pub fn into_data(self) -> T {
+    self.data
+  }
+
   /// Returns a reference to the node data.
   pub fn data(&self) -> &T {
     &self.data
