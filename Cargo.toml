@@ -10,5 +10,6 @@ documentation = "https://docs.rs/key-node-list"
 license = "GPL-3.0"
 keywords = ["list", "linked-list", "data-structure"]
 categories = ["data-structures"]
+exclude = ["/.github"]
 
 [dependencies]
