@@ -7,6 +7,7 @@ use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
+use std::iter::FromIterator;
 use std::marker::PhantomData;
 use std::ops::Index;
 
@@ -401,6 +402,58 @@ where
   }
 }
 
+impl<'a, K, T, N, M> Extend<(&'a K, &'a T)> for KeyNodeList<K, N, M>
+where
+  K: Eq + Hash + Copy,
+  T: Into<N> + Copy,
+  N: Node<Key = K> + Copy,
+  M: Map<K, N>,
+{
+  fn extend<I: IntoIterator<Item = (&'a K, &'a T)>>(&mut self, iter: I) {
+    self.extend(iter.into_iter().map(|(k, n)| (*k, *n)))
+  }
+}
+
+impl<K, T, N, M> Extend<(K, T)> for KeyNodeList<K, N, M>
+where
+  K: Eq + Hash + Clone,
+  T: Into<N>,
+  N: Node<Key = K>,
+  M: Map<K, N>,
+{
+  fn extend<I: IntoIterator<Item = (K, T)>>(&mut self, iter: I) {
+    iter.into_iter().for_each(|(k, n)| {
+      let _ = self.push_back(k, n);
+    });
+  }
+}
+
+impl<K, T, N, M, const LEN: usize> From<[(K, T); LEN]> for KeyNodeList<K, N, M>
+where
+  K: Eq + Hash + Clone,
+  T: Into<N>,
+  N: Node<Key = K>,
+  M: Map<K, N> + Default,
+{
+  fn from(arr: [(K, T); LEN]) -> Self {
+    std::array::IntoIter::new(arr).collect()
+  }
+}
+
+impl<K, T, N, M> FromIterator<(K, T)> for KeyNodeList<K, N, M>
+where
+  K: Eq + Hash + Clone,
+  T: Into<N>,
+  N: Node<Key = K>,
+  M: Map<K, N> + Default,
+{
+  fn from_iter<I: IntoIterator<Item = (K, T)>>(iter: I) -> Self {
+    let mut list = Self::new();
+    list.extend(iter);
+    list
+  }
+}
+
 impl<'a, K, Q, N, M> Index<&'a Q> for KeyNodeList<K, N, M>
 where
   K: Hash + Eq + Borrow<Q>,
@@ -442,3 +495,14 @@ where
     self.iter()
   }
 }
+
+impl<K, N, M> PartialEq<KeyNodeList<K, N, M>> for KeyNodeList<K, N, M>
+where
+  M: PartialEq,
+{
+  fn eq(&self, other: &KeyNodeList<K, N, M>) -> bool {
+    self.nodes == other.nodes
+  }
+}
+
+impl<K, N, M> Eq for KeyNodeList<K, N, M> where M: PartialEq {}
