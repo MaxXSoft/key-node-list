@@ -13,16 +13,31 @@ pub trait Map<K, V> {
   /// This operation should compute in *O*(1) time.
   fn len(&self) -> usize;
 
-  /// Clears the map, removing all key-value pairs.
-  /// Keeps the allocated memory for reuse.
-  fn clear(&mut self);
-
   /// Returns `true` if the map contains no elements.
   ///
   /// This operation should compute in *O*(1) time.
   #[inline]
   fn is_empty(&self) -> bool {
     self.len() == 0
+  }
+
+  /// Clears the map, removing all key-value pairs.
+  /// Keeps the allocated memory for reuse.
+  fn clear(&mut self);
+
+  /// Returns `true` if the map contains a value for the specified key.
+  ///
+  /// The key may be any borrowed form of the map’s key type, but [`Hash`]
+  /// and [`Eq`] on the borrowed form must match those for the key type.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  #[inline]
+  fn contains_key<Q: ?Sized>(&self, k: &Q) -> bool
+  where
+    K: Hash + Eq + Borrow<Q>,
+    Q: Hash + Eq,
+  {
+    self.get(k).is_some()
   }
 
   /// Returns a reference to the value corresponding to the key.
@@ -59,6 +74,22 @@ pub trait Map<K, V> {
   fn insert(&mut self, k: K, v: V)
   where
     K: Hash + Eq;
+
+  /// Removes a key from the map, returning the value at the key if the key
+  /// was previously in the map.
+  ///
+  /// The key may be any borrowed form of the map’s key type, but [`Hash`]
+  /// and [`Eq`] on the borrowed form must match those for the key type.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  #[inline]
+  fn remove<Q: ?Sized>(&mut self, k: &Q) -> Option<V>
+  where
+    K: Hash + Eq + Borrow<Q>,
+    Q: Hash + Eq,
+  {
+    self.remove_entry(k).map(|(_, v)| v)
+  }
 
   /// Removes a key from the map, returning the stored key and value if the
   /// key was previously in the map.
