@@ -293,20 +293,16 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   pub fn push_front<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
-    if self.contains_key(&key) {
-      Err((key, node))
-    } else {
+    self.nodes.insert(key.clone(), node).map(|_| {
       let next = self.head.replace(key.clone());
       match &next {
         Some(k) => *node_prev_mut!(self, k) = Some(key.clone()),
         None => self.tail = Some(key.clone()),
       }
-      let mut node = node.into();
+      let node = self.node_mut(&key).unwrap();
       *node_prev_mut!(node) = None;
       *node_next_mut!(node) = next;
-      self.nodes.insert(key, node);
-      Ok(())
-    }
+    })
   }
 
   /// Adds an key-node pair back in the list.
@@ -315,20 +311,16 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   pub fn push_back<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
-    if self.contains_key(&key) {
-      Err((key, node))
-    } else {
+    self.nodes.insert(key.clone(), node).map(|_| {
       let prev = self.tail.replace(key.clone());
       match &prev {
         Some(k) => *node_next_mut!(self, k) = Some(key.clone()),
         None => self.head = Some(key.clone()),
       }
-      let mut node = node.into();
+      let node = self.node_mut(&key).unwrap();
       *node_prev_mut!(node) = prev;
       *node_next_mut!(node) = None;
-      self.nodes.insert(key, node);
-      Ok(())
-    }
+    })
   }
 
   /// Removes the first key-node pair and returns it, or `None` if the list

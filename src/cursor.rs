@@ -254,10 +254,7 @@ where
   ///
   /// If `key` already exists, returns an error containing `key` and `node`.
   pub fn insert_after<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
-    if self.list.contains_key(&key) {
-      // `key` already exists
-      Err((key, node))
-    } else {
+    self.list.nodes.insert(key.clone(), node).map(|_| {
       // get the `next` pointer of the node pointed by the cursor
       let next = match &self.key {
         // cursor points to the key `k`
@@ -275,13 +272,10 @@ where
         None => self.list.tail = Some(key.clone()),
       }
       // update node's previous pointer and next pointer
-      let mut node = node.into();
+      let node = self.list.node_mut(&key).unwrap();
       *node_prev_mut!(node) = self.key.clone();
       *node_next_mut!(node) = next;
-      // insert key-node pair to the node map
-      self.list.nodes.insert(key, node);
-      Ok(())
-    }
+    })
   }
 
   /// Inserts a new key-node pair into the [`KeyNodeList`] before the current one.
@@ -291,10 +285,7 @@ where
   ///
   /// If `key` already exists, returns an error containing `key` and `node`.
   pub fn insert_before<T: Into<N>>(&mut self, key: K, node: T) -> Result<(), (K, T)> {
-    if self.list.contains_key(&key) {
-      // `key` already exists
-      Err((key, node))
-    } else {
+    self.list.nodes.insert(key.clone(), node).map(|_| {
       // get the `prev` pointer of the node pointed by the cursor
       let prev = match &self.key {
         // cursor points to the key `k`
@@ -312,13 +303,10 @@ where
         None => self.list.head = Some(key.clone()),
       }
       // update node's previous pointer and next pointer
-      let mut node = node.into();
+      let node = self.list.node_mut(&key).unwrap();
       *node_prev_mut!(node) = prev;
       *node_next_mut!(node) = self.key.clone();
-      // insert key-node pair to the node map
-      self.list.nodes.insert(key, node);
-      Ok(())
-    }
+    })
   }
 
   /// Removes the current pair from the [`KeyNodeList`].
