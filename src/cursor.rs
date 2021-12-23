@@ -309,6 +309,32 @@ where
     })
   }
 
+  /// Inserts a key into the [`KeyNodeList`] after the current one.
+  ///
+  /// If the cursor is pointing at the null pair then the key is inserted
+  /// at the front of the [`KeyNodeList`].
+  ///
+  /// If `key` already exists, returns an error containing `key`.
+  pub fn insert_key_after(&mut self, key: K) -> Result<(), K>
+  where
+    (): Into<N>,
+  {
+    self.insert_after(key, ()).map_err(|(k, _)| k)
+  }
+
+  /// Inserts a key into the [`KeyNodeList`] before the current one.
+  ///
+  /// If the cursor is pointing at the null pair then the key is inserted
+  /// at the front of the [`KeyNodeList`].
+  ///
+  /// If `key` already exists, returns an error containing `key`.
+  pub fn insert_key_before(&mut self, key: K) -> Result<(), K>
+  where
+    (): Into<N>,
+  {
+    self.insert_before(key, ()).map_err(|(k, _)| k)
+  }
+
   /// Removes the current pair from the [`KeyNodeList`].
   ///
   /// The pair that was removed is returned, and the cursor is moved to point
