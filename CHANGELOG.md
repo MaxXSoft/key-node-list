@@ -13,6 +13,7 @@ All notable changes to the Koopa will be documented in this file.
 ### Changed
 
 * Signature of trait method `Map::insert`.
+* Relexed generic type bound of `KeyNodeList::new`.
 
 ### Fixed
 
