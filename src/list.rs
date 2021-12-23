@@ -22,6 +22,17 @@ pub struct KeyNodeList<K, N, M = HashMap<K, N>> {
 
 impl<K, N, M> KeyNodeList<K, N, M>
 where
+  M: Default,
+{
+  /// Creates an empty linked list.
+  #[inline]
+  pub fn new() -> Self {
+    Self::default()
+  }
+}
+
+impl<K, N, M> KeyNodeList<K, N, M>
+where
   M: Map<K, N>,
 {
   /// Creates an linked list with the given hash map `map`.
@@ -97,17 +108,6 @@ where
   #[inline]
   pub fn nodes(&self) -> Nodes<K, N, M> {
     Nodes { iter: self.iter() }
-  }
-}
-
-impl<K, N, M> KeyNodeList<K, N, M>
-where
-  M: Map<K, N> + Default,
-{
-  /// Creates an empty linked list.
-  #[inline]
-  pub fn new() -> Self {
-    Self::default()
   }
 }
 
@@ -407,7 +407,7 @@ where
 
 impl<K, N, M> Default for KeyNodeList<K, N, M>
 where
-  M: Map<K, N> + Default,
+  M: Default,
 {
   #[inline]
   fn default() -> Self {
