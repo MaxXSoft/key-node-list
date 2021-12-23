@@ -125,7 +125,7 @@ where
     K: Borrow<Q>,
     Q: Hash + Eq,
   {
-    self.nodes.get(key).is_some()
+    self.nodes.contains_key(key)
   }
 
   /// Returns a reference to the node corresponding to the key,
@@ -337,7 +337,7 @@ where
   /// This operation should compute in *O*(1) time on average.
   pub fn pop_front(&mut self) -> Option<(K, N)> {
     self.head.take().map(|k| {
-      let (_, node) = self.nodes.remove_entry(&k).unwrap();
+      let node = self.nodes.remove(&k).unwrap();
       self.head = node.next().cloned();
       (k, node)
     })
@@ -349,7 +349,7 @@ where
   /// This operation should compute in *O*(1) time on average.
   pub fn pop_back(&mut self) -> Option<(K, N)> {
     self.tail.take().map(|k| {
-      let (_, node) = self.nodes.remove_entry(&k).unwrap();
+      let node = self.nodes.remove(&k).unwrap();
       self.tail = node.prev().cloned();
       (k, node)
     })
