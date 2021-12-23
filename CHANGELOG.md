@@ -8,6 +8,10 @@ All notable changes to the Koopa will be documented in this file.
 
 * Added more provided methods to `Map` trait.
 
+### Changed
+
+* Signature of trait method `Map::insert`.
+
 ### Fixed
 
 * Problem about generic type bound of `Index` trait of `KeyNodeList`.
