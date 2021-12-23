@@ -287,7 +287,7 @@ where
     }
   }
 
-  /// Adds an key-node pair first in the list.
+  /// Adds a key-node pair first in the list.
   ///
   /// If `key` already exists, returns an error containing `key` and `node`.
   ///
@@ -305,7 +305,7 @@ where
     })
   }
 
-  /// Adds an key-node pair back in the list.
+  /// Adds a key-node pair back in the list.
   ///
   /// If `key` already exists, returns an error containing `key` and `node`.
   ///
@@ -321,6 +321,32 @@ where
       *node_prev_mut!(node) = prev;
       *node_next_mut!(node) = None;
     })
+  }
+
+  /// Adds a key first in the list.
+  ///
+  /// If `key` already exists, returns an error containing `key`.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  #[inline]
+  pub fn push_key_front(&mut self, key: K) -> Result<(), K>
+  where
+    (): Into<N>,
+  {
+    self.push_front(key, ()).map_err(|(k, _)| k)
+  }
+
+  /// Adds a key back in the list.
+  ///
+  /// If `key` already exists, returns an error containing `key`.
+  ///
+  /// This operation should compute in *O*(1) time on average.
+  #[inline]
+  pub fn push_key_back(&mut self, key: K) -> Result<(), K>
+  where
+    (): Into<N>,
+  {
+    self.push_back(key, ()).map_err(|(k, _)| k)
   }
 
   /// Removes the first key-node pair and returns it, or `None` if the list
