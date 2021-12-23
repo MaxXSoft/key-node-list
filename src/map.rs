@@ -64,14 +64,14 @@ pub trait Map<K, V> {
 
   /// Inserts a key-value pair into the map.
   ///
-  /// If the map did not have this key present, [`None`] is returned.
+  /// If the map did have this key present, returns an error containing the
+  /// key and the value.
   ///
-  /// If the map did have this key present, the value is updated, and the
-  /// old value is returned. The key is not updated, though; this matters
-  /// for types that can be `==` without being identical.
+  /// If the map did not have this key present, the key-value pair is
+  /// inserted, and [`Ok(())`] is returned.
   ///
   /// This operation should compute in *O*(1) time on average.
-  fn insert(&mut self, k: K, v: V)
+  fn insert<T: Into<V>>(&mut self, k: K, v: T) -> Result<(), (K, T)>
   where
     K: Hash + Eq;
 
@@ -134,11 +134,17 @@ impl<K, V> Map<K, V> for HashMap<K, V> {
   }
 
   #[inline]
-  fn insert(&mut self, k: K, v: V)
+  #[allow(clippy::map_entry)]
+  fn insert<T: Into<V>>(&mut self, k: K, v: T) -> Result<(), (K, T)>
   where
     K: Hash + Eq,
   {
-    self.insert(k, v);
+    if self.contains_key(&k) {
+      Err((k, v))
+    } else {
+      self.insert(k, v.into());
+      Ok(())
+    }
   }
 
   #[inline]
