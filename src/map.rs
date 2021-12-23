@@ -68,7 +68,7 @@ pub trait Map<K, V> {
   /// key and the value.
   ///
   /// If the map did not have this key present, the key-value pair is
-  /// inserted, and [`Ok(())`] is returned.
+  /// inserted, and [`Ok(())`](Ok) is returned.
   ///
   /// This operation should compute in *O*(1) time on average.
   fn insert<T: Into<V>>(&mut self, k: K, v: T) -> Result<(), (K, T)>
