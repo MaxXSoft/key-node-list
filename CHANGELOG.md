@@ -6,7 +6,9 @@ All notable changes to the Koopa will be documented in this file.
 
 ### Added
 
-* Added more provided methods to `Map` trait.
+* More provided methods to `Map` trait.
+* Method `KeyNodeList::push_key_front` and `KeyNodeList::push_key_back`.
+* Method `CursorMut::insert_key_after` and `CursorMut::insert_key_before`.
 
 ### Changed
 
