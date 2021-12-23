@@ -458,13 +458,18 @@ impl<'a, K, Q, N, M> Index<&'a Q> for KeyNodeList<K, N, M>
 where
   K: Hash + Eq + Borrow<Q>,
   Q: ?Sized + Hash + Eq,
-  M: Map<K, N> + Index<&'a Q, Output = N>,
+  M: Map<K, N>,
 {
   type Output = N;
 
+  /// Returns a reference to the value corresponding to the supplied key.
+  ///
+  /// # Panics
+  ///
+  /// Panics if the key is not present in the [`KeyNodeList`].
   #[inline]
   fn index(&self, key: &'a Q) -> &Self::Output {
-    self.nodes.index(key)
+    self.nodes.get(key).expect("no entry found for key")
   }
 }
 
