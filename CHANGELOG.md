@@ -2,6 +2,12 @@
 
 All notable changes to the Koopa will be documented in this file.
 
+## 0.0.3 - 2022-01-05
+
+### Added
+
+* Implemented `Extend<&K>`, `Extend<K>`, `FromIterator<K>` trait for `KeyNodeList`.
+
 ## 0.0.2 - 2021-12-24
 
 ### Added
