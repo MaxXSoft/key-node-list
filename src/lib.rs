@@ -76,14 +76,14 @@
 //! ```
 //! use key_node_list::{Node, impl_node};
 //! use key_node_list::KeyNodeList;
-//! 
+//!
 //! struct NameNode<'a> {
 //!   first: &'a str,
 //!   last: &'a str,
 //!   prev: Option<i32>,
 //!   next: Option<i32>,
 //! }
-//! 
+//!
 //! impl<'a> From<(&'a str, &'a str)> for NameNode<'a> {
 //!   fn from(name: (&'a str, &'a str)) -> Self {
 //!     let (first, last) = name;
@@ -95,10 +95,10 @@
 //!     }
 //!   }
 //! }
-//! 
+//!
 //! // implements `Node` trait for `NameNode`
 //! impl_node!(NameNode<'a> { Key = i32, prev = prev, next = next });
-//! 
+//!
 //! // create a `KeyNodeList` with node type `NameNode`
 //! let mut names: KeyNodeList<_, NameNode> = KeyNodeList::new();
 //! names.push_back(1, ("Reimu", "Hakurei"));
@@ -289,7 +289,13 @@ mod test {
     let list1 = KeyValueList::from([(1, 1), (2, 2), (3, 3)]);
     let list2 = KeyValueList::from([(1, 1), (2, 2), (3, 3)]);
     let list3 = KeyValueList::from([(1, 1), (2, 2), (3, 4)]);
+    let list4: KeyValueList<i32, i32> = [(1, 1), (2, 2), (3, 4)].into_iter().collect();
+    let list5: KeyValueList<i32, ()> = [1, 2, 3].into_iter().collect();
+    let mut list6: KeyValueList<i32, ()> = KeyValueList::new();
+    list6.extend([1, 2, 3]);
     assert_eq!(list1, list2);
     assert_ne!(list1, list3);
+    assert_eq!(list3, list4);
+    assert_eq!(list5, list6);
   }
 }
