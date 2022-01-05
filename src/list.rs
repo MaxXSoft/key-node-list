@@ -432,6 +432,31 @@ where
   }
 }
 
+impl<'a, K: 'a, N, M> Extend<&'a K> for KeyNodeList<K, N, M>
+where
+  K: Eq + Hash + Copy,
+  (): Into<N>,
+  N: Node<Key = K> + Copy,
+  M: Map<K, N>,
+{
+  /// Extends a `KeyNodeList` with an key iterator
+  /// if the node can be built with a `()`.
+  ///
+  /// # Example
+  ///
+  /// ```
+  /// use key_node_list::KeyValueList;
+  ///
+  /// let mut list: KeyValueList<i32, ()> = KeyValueList::new();
+  /// list.extend(&[1, 2, 3]);
+  /// assert_eq!(list.front_key(), Some(&1));
+  /// assert_eq!(list.back_key(), Some(&3));
+  /// ```
+  fn extend<I: IntoIterator<Item = &'a K>>(&mut self, iter: I) {
+    self.extend(iter.into_iter().copied())
+  }
+}
+
 impl<K, T, N, M> Extend<(K, T)> for KeyNodeList<K, N, M>
 where
   K: Eq + Hash + Clone,
@@ -442,6 +467,33 @@ where
   fn extend<I: IntoIterator<Item = (K, T)>>(&mut self, iter: I) {
     iter.into_iter().for_each(|(k, n)| {
       let _ = self.push_back(k, n);
+    });
+  }
+}
+
+impl<K, N, M> Extend<K> for KeyNodeList<K, N, M>
+where
+  K: Eq + Hash + Clone,
+  (): Into<N>,
+  N: Node<Key = K>,
+  M: Map<K, N>,
+{
+  /// Extends a `KeyNodeList` with an key iterator
+  /// if the node can be built with a `()`.
+  ///
+  /// # Example
+  ///
+  /// ```
+  /// use key_node_list::KeyValueList;
+  ///
+  /// let mut list: KeyValueList<i32, ()> = KeyValueList::new();
+  /// list.extend([1, 2, 3]);
+  /// assert_eq!(list.front_key(), Some(&1));
+  /// assert_eq!(list.back_key(), Some(&3));
+  /// ```
+  fn extend<I: IntoIterator<Item = K>>(&mut self, iter: I) {
+    iter.into_iter().for_each(|k| {
+      let _ = self.push_key_back(k);
     });
   }
 }
@@ -466,6 +518,32 @@ where
   M: Map<K, N> + Default,
 {
   fn from_iter<I: IntoIterator<Item = (K, T)>>(iter: I) -> Self {
+    let mut list = Self::new();
+    list.extend(iter);
+    list
+  }
+}
+
+impl<K, N, M> FromIterator<K> for KeyNodeList<K, N, M>
+where
+  K: Eq + Hash + Clone,
+  (): Into<N>,
+  N: Node<Key = K>,
+  M: Map<K, N> + Default,
+{
+  /// Creates a `KeyNodeList` from an key iterator
+  /// if the node can be built with a `()`.
+  ///
+  /// # Example
+  ///
+  /// ```
+  /// use key_node_list::KeyValueList;
+  ///
+  /// let list: KeyValueList<i32, ()> = [1, 2, 3].into_iter().collect();
+  /// assert_eq!(list.front_key(), Some(&1));
+  /// assert_eq!(list.back_key(), Some(&3));
+  /// ```
+  fn from_iter<I: IntoIterator<Item = K>>(iter: I) -> Self {
     let mut list = Self::new();
     list.extend(iter);
     list
