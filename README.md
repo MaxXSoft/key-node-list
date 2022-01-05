@@ -17,7 +17,7 @@ You can complete key lookups, key-node pair updates, key-node pair deletions and
 
 ```toml
 [dependencies]
-key-node-list = "0.0.2"
+key-node-list = "0.0.3"
 ```
 
 ## Example
