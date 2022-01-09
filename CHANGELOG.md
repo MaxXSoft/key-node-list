@@ -2,6 +2,12 @@
 
 All notable changes to the Koopa will be documented in this file.
 
+## 0.0.4 - 2022-01-09
+
+### Added
+
+* Implemented `Clone` trait for all list iterators.
+
 ## 0.0.3 - 2022-01-05
 
 ### Added
