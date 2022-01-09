@@ -4,6 +4,7 @@ use crate::node::Node;
 use std::hash::Hash;
 
 /// An owning iterator over the key-node paris of a [`KeyNodeList`].
+#[derive(Clone)]
 pub struct IntoIter<K, N, M> {
   pub(crate) list: KeyNodeList<K, N, M>,
 }
@@ -23,6 +24,7 @@ where
 }
 
 /// An owning iterator over the keys of a [`KeyNodeList`].
+#[derive(Clone)]
 pub struct IntoKeys<K, N, M> {
   pub(crate) iter: IntoIter<K, N, M>,
 }
@@ -42,6 +44,7 @@ where
 }
 
 /// An owning iterator over the nodes of a [`KeyNodeList`].
+#[derive(Clone)]
 pub struct IntoNodes<K, N, M> {
   pub(crate) iter: IntoIter<K, N, M>,
 }
@@ -61,6 +64,7 @@ where
 }
 
 /// An iterator over the key-node pairs of a [`KeyNodeList`].
+#[derive(Clone)]
 pub struct Iter<'a, K, N, M> {
   pub(crate) list: &'a KeyNodeList<K, N, M>,
   pub(crate) key: Option<&'a K>,
@@ -86,6 +90,7 @@ where
 }
 
 /// An iterator over the keys of a [`KeyNodeList`].
+#[derive(Clone)]
 pub struct Keys<'a, K, N, M> {
   pub(crate) iter: Iter<'a, K, N, M>,
 }
@@ -105,6 +110,7 @@ where
 }
 
 /// An iterator over the nodes of a [`KeyNodeList`].
+#[derive(Clone)]
 pub struct Nodes<'a, K, N, M> {
   pub(crate) iter: Iter<'a, K, N, M>,
 }
