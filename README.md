@@ -13,11 +13,10 @@ You can complete key lookups, key-node pair updates, key-node pair deletions and
 
 ## Usage
 
-[`key_node_list` is available on crates.io](https://crates.io/crates/key-node-list), so:
+[`key_node_list` is available on crates.io](https://crates.io/crates/key-node-list):
 
-```toml
-[dependencies]
-key-node-list = "0.0.4"
+```
+cargo add key-node-list
 ```
 
 ## Example
@@ -61,4 +60,4 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-Copyright (C) 2010-2021 MaxXing. License GPLv3.
+Copyright (C) 2010-2023 MaxXing. License GPLv3.
