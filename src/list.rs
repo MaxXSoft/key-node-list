@@ -195,7 +195,7 @@ where
   pub fn cursor(&self, key: K) -> Cursor<K, N, M> {
     Cursor {
       list: self,
-      key: self.contains_key(&key).then(|| key),
+      key: self.contains_key(&key).then_some(key),
     }
   }
 
@@ -205,7 +205,7 @@ where
   #[inline]
   pub fn cursor_mut(&mut self, key: K) -> CursorMut<K, N, M> {
     CursorMut {
-      key: self.contains_key(&key).then(|| key),
+      key: self.contains_key(&key).then_some(key),
       list: self,
     }
   }
@@ -506,7 +506,7 @@ where
   M: Map<K, N> + Default,
 {
   fn from(arr: [(K, T); LEN]) -> Self {
-    std::array::IntoIter::new(arr).collect()
+    IntoIterator::into_iter(arr).collect()
   }
 }
 
