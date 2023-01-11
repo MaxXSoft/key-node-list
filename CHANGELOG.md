@@ -2,6 +2,12 @@
 
 All notable changes to the Koopa will be documented in this file.
 
+## Unreleased
+
+### Fixed
+
+* Some deprecated and non-recommended uses in the source code.
+
 ## 0.0.4 - 2022-01-09
 
 ### Added
