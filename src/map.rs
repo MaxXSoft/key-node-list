@@ -32,10 +32,10 @@ pub trait Map<K, V> {
   ///
   /// This operation should compute in *O*(1) time on average.
   #[inline]
-  fn contains_key<Q: ?Sized>(&self, k: &Q) -> bool
+  fn contains_key<Q>(&self, k: &Q) -> bool
   where
     K: Hash + Eq + Borrow<Q>,
-    Q: Hash + Eq,
+    Q: ?Sized + Hash + Eq,
   {
     self.get(k).is_some()
   }
@@ -46,10 +46,10 @@ pub trait Map<K, V> {
   /// and [`Eq`] on the borrowed form must match those for the key type.
   ///
   /// This operation should compute in *O*(1) time on average.
-  fn get<Q: ?Sized>(&self, k: &Q) -> Option<&V>
+  fn get<Q>(&self, k: &Q) -> Option<&V>
   where
     K: Hash + Eq + Borrow<Q>,
-    Q: Hash + Eq;
+    Q: ?Sized + Hash + Eq;
 
   /// Returns a mutable reference to the value corresponding to the key.
   ///
@@ -57,10 +57,10 @@ pub trait Map<K, V> {
   /// and [`Eq`] on the borrowed form must match those for the key type.
   ///
   /// This operation should compute in *O*(1) time on average.
-  fn get_mut<Q: ?Sized>(&mut self, k: &Q) -> Option<&mut V>
+  fn get_mut<Q>(&mut self, k: &Q) -> Option<&mut V>
   where
     K: Hash + Eq + Borrow<Q>,
-    Q: Hash + Eq;
+    Q: ?Sized + Hash + Eq;
 
   /// Inserts a key-value pair into the map.
   ///
@@ -83,10 +83,10 @@ pub trait Map<K, V> {
   ///
   /// This operation should compute in *O*(1) time on average.
   #[inline]
-  fn remove<Q: ?Sized>(&mut self, k: &Q) -> Option<V>
+  fn remove<Q>(&mut self, k: &Q) -> Option<V>
   where
     K: Hash + Eq + Borrow<Q>,
-    Q: Hash + Eq,
+    Q: ?Sized + Hash + Eq,
   {
     self.remove_entry(k).map(|(_, v)| v)
   }
@@ -98,10 +98,10 @@ pub trait Map<K, V> {
   /// and [`Eq`] on the borrowed form must match those for the key type.
   ///
   /// This operation should compute in *O*(1) time on average.
-  fn remove_entry<Q: ?Sized>(&mut self, k: &Q) -> Option<(K, V)>
+  fn remove_entry<Q>(&mut self, k: &Q) -> Option<(K, V)>
   where
     K: Hash + Eq + Borrow<Q>,
-    Q: Hash + Eq;
+    Q: ?Sized + Hash + Eq;
 }
 
 impl<K, V> Map<K, V> for HashMap<K, V> {
@@ -116,19 +116,19 @@ impl<K, V> Map<K, V> for HashMap<K, V> {
   }
 
   #[inline]
-  fn get<Q: ?Sized>(&self, k: &Q) -> Option<&V>
+  fn get<Q>(&self, k: &Q) -> Option<&V>
   where
     K: Hash + Eq + Borrow<Q>,
-    Q: Hash + Eq,
+    Q: ?Sized + Hash + Eq,
   {
     self.get(k)
   }
 
   #[inline]
-  fn get_mut<Q: ?Sized>(&mut self, k: &Q) -> Option<&mut V>
+  fn get_mut<Q>(&mut self, k: &Q) -> Option<&mut V>
   where
     K: Hash + Eq + Borrow<Q>,
-    Q: Hash + Eq,
+    Q: ?Sized + Hash + Eq,
   {
     self.get_mut(k)
   }
@@ -148,10 +148,10 @@ impl<K, V> Map<K, V> for HashMap<K, V> {
   }
 
   #[inline]
-  fn remove_entry<Q: ?Sized>(&mut self, k: &Q) -> Option<(K, V)>
+  fn remove_entry<Q>(&mut self, k: &Q) -> Option<(K, V)>
   where
     K: Hash + Eq + Borrow<Q>,
-    Q: Hash + Eq,
+    Q: ?Sized + Hash + Eq,
   {
     self.remove_entry(k)
   }

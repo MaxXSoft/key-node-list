@@ -120,10 +120,10 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   #[inline]
-  pub fn contains_key<Q: ?Sized>(&self, key: &Q) -> bool
+  pub fn contains_key<Q>(&self, key: &Q) -> bool
   where
     K: Borrow<Q>,
-    Q: Hash + Eq,
+    Q: ?Sized + Hash + Eq,
   {
     self.nodes.contains_key(key)
   }
@@ -133,10 +133,10 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   #[inline]
-  pub fn node<Q: ?Sized>(&self, key: &Q) -> Option<&N>
+  pub fn node<Q>(&self, key: &Q) -> Option<&N>
   where
     K: Borrow<Q>,
-    Q: Hash + Eq,
+    Q: ?Sized + Hash + Eq,
   {
     self.nodes.get(key)
   }
@@ -146,10 +146,10 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   #[inline]
-  pub fn node_mut<Q: ?Sized>(&mut self, key: &Q) -> Option<&mut N>
+  pub fn node_mut<Q>(&mut self, key: &Q) -> Option<&mut N>
   where
     K: Borrow<Q>,
-    Q: Hash + Eq,
+    Q: ?Sized + Hash + Eq,
   {
     self.nodes.get_mut(key)
   }
@@ -375,10 +375,10 @@ where
 
   /// Removes the key-node pair at the given key and returns it,
   /// or returns `None` if `key` does not exists.
-  pub fn remove<Q: ?Sized>(&mut self, key: &Q) -> Option<(K, N)>
+  pub fn remove<Q>(&mut self, key: &Q) -> Option<(K, N)>
   where
     K: Borrow<Q>,
-    Q: Hash + Eq,
+    Q: ?Sized + Hash + Eq,
   {
     self.nodes.remove_entry(key).map(|(k, n)| {
       match n.prev() {
