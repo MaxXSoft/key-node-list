@@ -89,7 +89,7 @@ where
   /// Returns an iterator over all keys and nodes.
   /// The iterator element type is `(&'a K, &'a N)`.
   #[inline]
-  pub fn iter(&self) -> Iter<K, N, M> {
+  pub fn iter(&self) -> Iter<'_, K, N, M> {
     Iter {
       list: self,
       key: self.head.as_ref(),
@@ -99,14 +99,14 @@ where
   /// Returns an iterator over all keys.
   /// The iterator element type is `&'a K`.
   #[inline]
-  pub fn keys(&self) -> Keys<K, N, M> {
+  pub fn keys(&self) -> Keys<'_, K, N, M> {
     Keys { iter: self.iter() }
   }
 
   /// Returns an iterator over all nodes.
   /// The iterator element type is `&'a N`.
   #[inline]
-  pub fn nodes(&self) -> Nodes<K, N, M> {
+  pub fn nodes(&self) -> Nodes<'_, K, N, M> {
     Nodes { iter: self.iter() }
   }
 }
@@ -192,7 +192,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the key does not exist.
   #[inline]
-  pub fn cursor(&self, key: K) -> Cursor<K, N, M> {
+  pub fn cursor(&self, key: K) -> Cursor<'_, K, N, M> {
     Cursor {
       list: self,
       key: self.contains_key(&key).then_some(key),
@@ -203,7 +203,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the key does not exist.
   #[inline]
-  pub fn cursor_mut(&mut self, key: K) -> CursorMut<K, N, M> {
+  pub fn cursor_mut(&mut self, key: K) -> CursorMut<'_, K, N, M> {
     CursorMut {
       key: self.contains_key(&key).then_some(key),
       list: self,
@@ -220,7 +220,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the list is empty.
   #[inline]
-  pub fn cursor_front(&self) -> Cursor<K, N, M> {
+  pub fn cursor_front(&self) -> Cursor<'_, K, N, M> {
     Cursor {
       list: self,
       key: self.head.clone(),
@@ -231,7 +231,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the list is empty.
   #[inline]
-  pub fn cursor_front_mut(&mut self) -> CursorMut<K, N, M> {
+  pub fn cursor_front_mut(&mut self) -> CursorMut<'_, K, N, M> {
     CursorMut {
       key: self.head.clone(),
       list: self,
@@ -242,7 +242,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the list is empty.
   #[inline]
-  pub fn cursor_back(&self) -> Cursor<K, N, M> {
+  pub fn cursor_back(&self) -> Cursor<'_, K, N, M> {
     Cursor {
       list: self,
       key: self.tail.clone(),
@@ -253,7 +253,7 @@ where
   ///
   /// The cursor is pointing to the null pair if the list is empty.
   #[inline]
-  pub fn cursor_back_mut(&mut self) -> CursorMut<K, N, M> {
+  pub fn cursor_back_mut(&mut self) -> CursorMut<'_, K, N, M> {
     CursorMut {
       key: self.tail.clone(),
       list: self,

@@ -196,7 +196,7 @@ where
   /// [`CursorMut`], which means it cannot outlive the [`CursorMut`] and that
   /// the [`CursorMut`] is frozen for the lifetime of the [`Cursor`].
   #[inline]
-  pub fn as_cursor(&self) -> Cursor<K, N, M> {
+  pub fn as_cursor(&self) -> Cursor<'_, K, N, M> {
     Cursor {
       list: self.list,
       key: self.key.clone(),
