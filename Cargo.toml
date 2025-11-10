@@ -1,6 +1,6 @@
 [package]
 name = "key-node-list"
-version = "0.0.5"
+version = "0.0.6"
 authors = ["MaxXing <x@MaxXSoft.net>"]
 edition = "2024"
 description = "Doubly-linked list that stores key-node pairs."

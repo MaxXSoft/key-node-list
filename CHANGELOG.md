@@ -2,6 +2,13 @@
 
 All notable changes to the Koopa will be documented in this file.
 
+## 0.0.6 - 2025-11-10
+
+### Changed
+
+* Bumped to Rust 2024 edition.
+* Changed license to Apache-2.0/MIT.
+
 ## 0.0.5 - 2023-01-12
 
 ### Fixed
