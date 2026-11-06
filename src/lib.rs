@@ -214,6 +214,70 @@ mod test {
   }
 
   #[test]
+  fn test_pop_repairs_neighbor_links() {
+    let mut list = KeyValueList::from([(1, 10), (2, 20), (3, 30)]);
+    assert_eq!(list.pop_front().map(|(k, _)| k), Some(1));
+    assert_eq!(list.front_node().unwrap().prev(), None);
+    assert_eq!(list.remove(&2).map(|(k, _)| k), Some(2));
+    assert_eq!(list.pop_back().map(|(k, _)| k), Some(3));
+    assert_eq!(list.front_key(), None);
+    assert_eq!(list.back_key(), None);
+    assert!(list.is_empty());
+
+    let mut list = KeyValueList::from([(1, 10), (2, 20), (3, 30)]);
+    assert_eq!(list.pop_back().map(|(k, _)| k), Some(3));
+    assert_eq!(list.back_node().unwrap().next(), None);
+    assert_eq!(list.remove(&2).map(|(k, _)| k), Some(2));
+    assert_eq!(list.pop_front().map(|(k, _)| k), Some(1));
+    assert_eq!(list.front_key(), None);
+    assert_eq!(list.back_key(), None);
+    assert!(list.is_empty());
+  }
+
+  #[test]
+  fn test_pop_last_then_reuse() {
+    for pop_front in [false, true] {
+      for push_front in [false, true] {
+        let mut list = KeyValueList::from([(1, 10)]);
+        let removed = if pop_front {
+          list.pop_front()
+        } else {
+          list.pop_back()
+        };
+        assert_eq!(removed.map(|(k, n)| (k, n.into_value())), Some((1, 10)));
+        assert_eq!(list.front_key(), None);
+        assert_eq!(list.back_key(), None);
+        assert!(list.pop_front().is_none());
+        assert!(list.pop_back().is_none());
+        if push_front {
+          list.push_front(2, 20).unwrap();
+        } else {
+          list.push_back(2, 20).unwrap();
+        }
+        assert_eq!(list.keys().copied().collect::<Vec<_>>(), [2]);
+        assert_eq!(list.front_key(), Some(&2));
+        assert_eq!(list.back_key(), Some(&2));
+      }
+    }
+  }
+
+  #[test]
+  fn test_cursor_pop_then_insert() {
+    let mut list = KeyValueList::from([(1, 10), (2, 20), (3, 30)]);
+    let mut cursor = list.cursor_front_mut();
+    assert_eq!(cursor.pop_front().map(|(k, _)| k), Some(1));
+    assert_eq!(cursor.key(), Some(&2));
+    cursor.insert_before(4, 40).unwrap();
+    cursor.move_next();
+    assert_eq!(cursor.pop_back().map(|(k, _)| k), Some(3));
+    assert!(cursor.is_null());
+    cursor.move_prev();
+    assert_eq!(cursor.key(), Some(&2));
+    cursor.insert_after(5, 50).unwrap();
+    assert_eq!(list.keys().copied().collect::<Vec<_>>(), [4, 2, 5]);
+  }
+
+  #[test]
   fn test_push_front_iter() {
     let mut list = KeyValueList::new();
     for i in 0..10 {

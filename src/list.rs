@@ -354,11 +354,7 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   pub fn pop_front(&mut self) -> Option<(K, N)> {
-    self.head.take().map(|k| {
-      let node = self.nodes.remove(&k).unwrap();
-      self.head = node.next().cloned();
-      (k, node)
-    })
+    self.head.clone().and_then(|k| self.remove(&k))
   }
 
   /// Removes the last key-node pair and returns it, or `None` if the list
@@ -366,11 +362,7 @@ where
   ///
   /// This operation should compute in *O*(1) time on average.
   pub fn pop_back(&mut self) -> Option<(K, N)> {
-    self.tail.take().map(|k| {
-      let node = self.nodes.remove(&k).unwrap();
-      self.tail = node.prev().cloned();
-      (k, node)
-    })
+    self.tail.clone().and_then(|k| self.remove(&k))
   }
 
   /// Removes the key-node pair at the given key and returns it,
