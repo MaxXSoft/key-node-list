@@ -157,6 +157,25 @@ pub(crate) use node_next_mut;
 #[cfg(test)]
 mod test {
   use super::*;
+  use std::collections::HashMap;
+
+  #[test]
+  fn test_with_empty_map() {
+    let map = HashMap::with_capacity(4);
+    let mut list: KeyValueList<i32, i32> = KeyNodeList::with_map(map);
+    assert!(list.is_empty());
+    list.push_back(1, 10).unwrap();
+    list.push_front(2, 20).unwrap();
+    assert_eq!(list.keys().copied().collect::<Vec<_>>(), [2, 1]);
+    assert_eq!(list.len(), 2);
+  }
+
+  #[test]
+  #[should_panic(expected = "the underlying map must be empty")]
+  fn test_with_nonempty_map() {
+    let map = HashMap::from([(1, ValueNode::new(10))]);
+    let _: KeyValueList<i32, i32> = KeyNodeList::with_map(map);
+  }
 
   #[test]
   fn test_capacity() {
