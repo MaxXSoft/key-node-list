@@ -604,4 +604,14 @@ where
   }
 }
 
-impl<K, N, M> Eq for KeyNodeList<K, N, M> where M: PartialEq {}
+/// Equality is total only when the underlying map implements [`Eq`].
+/// In particular, floating-point values do not satisfy this requirement:
+///
+/// ```compile_fail
+/// use key_node_list::KeyValueList;
+///
+/// fn require_eq<T: Eq>(_: &T) {}
+/// let list = KeyValueList::from([(1, f32::NAN)]);
+/// require_eq(&list);
+/// ```
+impl<K, N, M> Eq for KeyNodeList<K, N, M> where M: Eq {}
