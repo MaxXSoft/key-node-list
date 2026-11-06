@@ -35,9 +35,15 @@ impl<K, N, M> KeyNodeList<K, N, M>
 where
   M: Map<K, N>,
 {
-  /// Creates an linked list with the given hash map `map`.
+  /// Creates an empty linked list with the given empty hash map `map`.
+  ///
+  /// # Panics
+  ///
+  /// Panics if `map` is not empty. Existing map entries have no list order;
+  /// insert them through the list's push or cursor methods instead.
   #[inline]
   pub fn with_map(map: M) -> Self {
+    assert!(map.is_empty(), "the underlying map must be empty");
     Self {
       nodes: map,
       head: None,
