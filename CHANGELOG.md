@@ -1,6 +1,17 @@
 # Changelog
 
-All notable changes to the Koopa will be documented in this file.
+All notable changes to the key-node-list will be documented in this file.
+
+## 0.0.7 - 2026-11-17
+
+### Changed
+
+* `KeyNodeList::with_map` now panics if the given map is not empty.
+* `Eq` for `KeyNodeList` now requires the underlying map to implement `Eq` instead of `PartialEq`.
+
+### Fixed
+
+* `KeyNodeList::pop_front`, `KeyNodeList::pop_back`, `CursorMut::pop_front` and `CursorMut::pop_back` did not update neighbor links and list endpoints, which could cause panics in subsequent operations.
 
 ## 0.0.6 - 2025-11-10
 
